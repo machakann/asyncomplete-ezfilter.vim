@@ -23,9 +23,9 @@ endif
 
 
 function! asyncomplete#preprocessor#ezfilter#filter(ctx, matches) abort "{{{
-  let forwardmatchpat = '^' . s:escape(a:ctx.base)
+  let matchpat = '^' . s:escape(a:ctx.base)
   let ctx = copy(a:ctx)
-  let ctx.forwardmatch = {word -> word =~? forwardmatchpat}
+  let ctx.match = {word -> word =~? matchpat}
   let ctx.JWdistance = function('s:JWdistance')
   let ctx.rDLdistance = function('s:rDLdistance')
   let config = g:asyncomplete#preprocessor#ezfilter#config
@@ -39,14 +39,14 @@ function! asyncomplete#preprocessor#ezfilter#filter(ctx, matches) abort "{{{
 endfunction "}}}
 
 
-" function! s:forwardmatch_filter() abort {{{
+" function! s:match_filter() abort {{{
 if s:python3_available
-  function! s:forwardmatch_filter(ctx, items) abort
-    return py3eval('asyncomplete_ezfilter.forwardmatch_filter(vim.eval("a:items"), vim.eval("a:ctx.base"))')
+  function! s:match_filter(ctx, items) abort
+    return py3eval('asyncomplete_ezfilter.match_filter(vim.eval("a:items"), vim.eval("a:ctx.base"))')
   endfunction
 else
-  function! s:forwardmatch_filter(ctx, items) abort
-    return filter(a:items, 'ctx.forwardmatch(v:val.word)')
+  function! s:match_filter(ctx, items) abort
+    return filter(a:items, 'ctx.match(v:val.word)')
   endfunction
 endif
 "}}}
@@ -73,7 +73,7 @@ endfunction "}}}
 let g:asyncomplete#preprocessor#ezfilter#config =
   \ get(g:, 'asyncomplete#preprocessor#ezfilter#config', {})
 call extend(g:asyncomplete#preprocessor#ezfilter#config, {
-  \ '*': function('s:forwardmatch_filter')}, 'keep')
+  \ '*': function('s:match_filter')}, 'keep')
 
 " vim:set foldmethod=marker:
 " vim:set commentstring="%s:

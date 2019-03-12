@@ -10,7 +10,7 @@ Put the funcref of `asyncomplete#preprocessor#ezfilter#filter` at the beginning 
 
 The filter function should accept two arguments and return a list of completion items.
 
-The first arguments `ctx` has the context information. For example, `ctx.base` is the string just before the cursor. Additionally, the `ctx` has several methods, `ctx.forwardmatch(item)` returns true if the assigned string `item` is forward matched to `ctx.base`. Note that `ctx.forwardmatch()` ignore the cases of the strings.
+The first arguments `ctx` has the context information. For example, `ctx.base` is the string just before the cursor. Additionally, the `ctx` has several methods, `ctx.match(item)` returns true if the assigned string `item` is forward matched to `ctx.base`. Note that `ctx.match()` ignore the cases of the strings.
 
 The second arguments `items` is a list of complete items. It is a shallow copy of `matches.items` (Refer the help of asyncomplete.vim v2). Check out `:help complete-items` for the specification of a complete item.
 
@@ -40,7 +40,7 @@ autocmd User asyncomplete_setup call asyncomplete#register_source(asyncomplete#s
   \ }))
 
 let g:asyncomplete#preprocessor#ezfilter#config.unicodesymbol =
-  \ {ctx, items -> filter(items, 'ctx.forwardmatch(v:val.menu)')}
+  \ {ctx, items -> filter(items, 'ctx.match(v:val.menu)')}
 ```
 
  * Use [vim-Verdin](https://github.com/machakann/vim-Verdin)
@@ -56,7 +56,7 @@ autocmd User asyncomplete_setup call asyncomplete#register_source(asyncomplete#s
   \ }))
 
 function! g:asyncomplete#preprocessor#ezfilter#config.Verdin(ctx, items) abort
-  let list = filter(copy(a:items), 'a:ctx.forwardmatch(v:val.word)')
+  let list = filter(copy(a:items), 'a:ctx.match(v:val.word)')
   let n = strlen(a:ctx.base)
   if n > 3
     let fuzzy = filter(a:items, 'a:ctx.JWdistance(v:val.word[: n]) < 0.15')
@@ -69,7 +69,7 @@ endfunction
 
 ### Methods of ctx
 
- * ctx.forwardmatch({item})
+ * ctx.match({item})
 
 Return 1 if {item} is forward-matched with `ctx.base`, otherwise 0.
 

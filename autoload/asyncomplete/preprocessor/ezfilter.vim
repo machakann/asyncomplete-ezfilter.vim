@@ -37,7 +37,7 @@ endfunction "}}}
 
 if s:python3_available
 
-  function! s:JWdistance(word, ...) dict abort "{{{
+  function! s:jw_distance(word, ...) dict abort "{{{
     let base = get(a:000, 0, self.base)
     return py3eval('asyncomplete_ezfilter.jaro_winkler_distance(vim.eval("a:word"), vim.eval("base"))')
   endfunction "}}}
@@ -51,7 +51,7 @@ if s:python3_available
     return py3eval('asyncomplete_ezfilter.match_filter(vim.eval("a:items"), vim.eval("self.base"))')
   endfunction "}}}
 
-  function! s:JWdistance_filter(items, thr) dict abort "{{{
+  function! s:jw_filter(items, thr) dict abort "{{{
     return py3eval('asyncomplete_ezfilter.jaro_winkler_filter(vim.eval("a:items"), vim.eval("self.base"), vim.eval("a:thr"))')
   endfunction "}}}
 
@@ -61,7 +61,7 @@ if s:python3_available
 
 else
 
-  function! s:JWdistance(word, ...) dict abort "{{{
+  function! s:jw_distance(word, ...) dict abort "{{{
     let base = get(a:000, 0, self.base)
     return asyncomplete#preprocessor#ezfilter#JaroWinkler#distance(a:word, base)
   endfunction "}}}
@@ -75,9 +75,9 @@ else
     return filter(a:items, 'self.match(v:val.word)')
   endfunction "}}}
 
-  function! s:JWdistance_filter(items, thr) dict abort "{{{
+  function! s:jw_filter(items, thr) dict abort "{{{
     let matchlist = self.match_filter(copy(a:items))
-    let fuzzymatchlist = filter(a:items, '!self.match(v:val.word) && self.JWdistance(v:val.word) <= a:thr')
+    let fuzzymatchlist = filter(a:items, '!self.match(v:val.word) && self.jw_distance(v:val.word) <= a:thr')
     return extend(matchlist, fuzzymatchlist)
   endfunction "}}}
 
@@ -93,10 +93,10 @@ endif
 function! s:set_methods(ctx) abort "{{{
   let matchpat = '^' . s:escape(a:ctx.base)
   let a:ctx.match = {word -> word =~? matchpat}
-  let a:ctx.JWdistance = function('s:JWdistance')
+  let a:ctx.jw_distance = function('s:jw_distance')
   let a:ctx.rDLdistance = function('s:rDLdistance')
   let a:ctx.match_filter = function('s:match_filter')
-  let a:ctx.JW_filter = function('s:JWdistance_filter')
+  let a:ctx.jw_filter = function('s:jw_filter')
   let a:ctx.rDL_filter = function('s:rDLdistance_filter')
   return a:ctx
 endfunction "}}}

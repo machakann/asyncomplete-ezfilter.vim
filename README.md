@@ -10,7 +10,7 @@ Put the funcref of `asyncomplete#preprocessor#ezfilter#filter` at the beginning 
 
 The filter function should accept two arguments and return a list of completion items.
 
-The first arguments `ctx` has the context information. For example, `ctx.base` is the string just before the cursor. Additionally, the `ctx` has several methods, `ctx.match(item)` returns true if the assigned string `item` is forward matched to `ctx.base`. Note that `ctx.match()` ignore the cases of the strings.
+The first arguments `ctx` has the context information. For example, `ctx.base` is the string just before the cursor. Additionally, the `ctx` has several useful methods for filtering, see the reference.
 
 The second arguments `items` is a list of complete items. It is a shallow copy of `matches.items` (Refer the help of asyncomplete.vim v2). Check out `:help complete-items` for the specification of a complete item.
 
@@ -22,9 +22,8 @@ The second arguments `items` is a list of complete items. It is a shallow copy o
 ```vim
 let g:asyncomplete_preprocessor = [function('asyncomplete#preprocessor#ezfilter#filter')]
 
-let g:asyncomplete#preprocessor#ezfilter#config = {
-  \   '*': {ctx, items -> filter(items, 'stridx(v:val.word, ctx.base) == 0')}
-  \ }
+let g:asyncomplete#preprocessor#ezfilter#config['*'] =
+  \ {ctx, items -> filter(items, 'stridx(v:val.word, ctx.base) == 0')}
 ```
 
  * Use [asyncomplete-unicodesymbol](https://github.com/machakann/asyncomplete-unicodesymbol)
@@ -55,15 +54,8 @@ autocmd User asyncomplete_setup call asyncomplete#register_source(asyncomplete#s
   \ 'completor': function('asyncomplete#sources#Verdin#completor'),
   \ }))
 
-function! g:asyncomplete#preprocessor#ezfilter#config.Verdin(ctx, items) abort
-  let list = filter(copy(a:items), 'a:ctx.match(v:val.word)')
-  let n = strlen(a:ctx.base)
-  if n > 3
-    let fuzzy = filter(a:items, 'a:ctx.JWdistance(v:val.word[: n]) < 0.15')
-    call extend(list, fuzzy)
-  endif
-  return list
-endfunction
+let g:asyncomplete#preprocessor#ezfilter#config.Verdin =
+  \ {ctx, items -> ctx.jw_filter(items, 0.2)}
 ```
 
 
@@ -71,12 +63,24 @@ endfunction
 
  * ctx.match({item})
 
-Return 1 if {item} is forward-matched with `ctx.base`, otherwise 0.
+Return 1 if `{item}.word` is forward-matched with `ctx.base`, otherwise 0.
 
- * ctx.JWdistance({item}[, {base}])
+ * ctx.jw_distance({item}[, {base}])
 
-Return the [Jaro-Winker distance](https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance) between the two string {item} and {base}. `ctx.base` is used as {base} if it is omitted.
+Return the [Jaro-Winker distance](https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance) between the two string {item} and {base}. Jaro-Winkler distance ranges from 0 to 1, smaller is similar. `ctx.base` is used as {base} if it is omitted.
 
- * ctx.rDLdistance({item}[, {base}])
+ * ctx.osa_distance({item}[, {base}])
 
-Return the [ristricted Damerau-Levenshtein distance](https://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance) (Optimal string alignment distance) between the two string {item} and {base}. `ctx.base` is used as {base} if it is omitted.
+Return the [ristricted Damerau-Levenshtein distance](https://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance) (Optimal string alignment distance) between the two string {item} and {base}. Ristricted Damerau-Levenshtein distance represents the number of edit to make the two strings equal by deletion, insertion, substitution or transposition. Smaller is similar. `ctx.base` is used as {base} if it is omitted.
+
+ * ctx.filter({items})
+
+Filter items in {items} by forward-matching. This is an equivalent of `filter(copy({items}), 'ctx.match(v:val.word)')` but might be faster if python3 interface is available.
+
+ * ctx.jw_filter({items}, {thr})
+
+Filter items in {items} by Jaro-Winkler distance; items with a distance larger than {thr} are filtered out. Jaro-Winkler distance ranges from 0 to 1, typically 0.2 may work.
+
+ * ctx.osa_filter({items}, {thr})
+
+Filter items in {items} by optimal string alignment distance; items with a distance larger than {thr} are filtered out. Typically, 1 or 2 may work.

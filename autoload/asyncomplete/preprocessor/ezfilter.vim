@@ -23,12 +23,8 @@ endif
 
 
 function! asyncomplete#preprocessor#ezfilter#filter(ctx, matches) abort "{{{
-  let matchpat = '^' . s:escape(a:ctx.base)
-  let ctx = copy(a:ctx)
-  let ctx.match = {word -> word =~? matchpat}
-  let ctx.JWdistance = function('s:JWdistance')
-  let ctx.rDLdistance = function('s:rDLdistance')
   let config = g:asyncomplete#preprocessor#ezfilter#config
+  let ctx = s:set_methods(copy(a:ctx))
   let items = []
   for [source_name, matches] in items(a:matches)
     let key = has_key(config, source_name) ? source_name : '*'
@@ -39,28 +35,70 @@ function! asyncomplete#preprocessor#ezfilter#filter(ctx, matches) abort "{{{
 endfunction "}}}
 
 
-" function! s:match_filter() abort {{{
 if s:python3_available
-  function! s:match_filter(ctx, items) abort
-    return py3eval('asyncomplete_ezfilter.match_filter(vim.eval("a:items"), vim.eval("a:ctx.base"))')
-  endfunction
+
+  function! s:JWdistance(word, ...) dict abort "{{{
+    let base = get(a:000, 0, self.base)
+    return py3eval('asyncomplete_ezfilter.jaro_winkler_distance(vim.eval("a:word"), vim.eval("base"))')
+  endfunction "}}}
+
+  function! s:rDLdistance(word, ...) dict abort "{{{
+    let base = get(a:000, 0, self.base)
+    return py3eval('asyncomplete_ezfilter.ristricted_damerau_levenshtein_distance(vim.eval("a:word"), vim.eval("base"))')
+  endfunction "}}}
+
+  function! s:match_filter(items) abort "{{{
+    return py3eval('asyncomplete_ezfilter.match_filter(vim.eval("a:items"), vim.eval("self.base"))')
+  endfunction "}}}
+
+  function! s:JWdistance_filter(items, thr) dict abort "{{{
+    return py3eval('asyncomplete_ezfilter.jaro_winkler_filter(vim.eval("a:items"), vim.eval("self.base"), vim.eval("a:thr"))')
+  endfunction "}}}
+
+  function! s:rDLdistance_filter(items, thr) dict abort "{{{
+    return py3eval('asyncomplete_ezfilter.ristricted_damerau_levenshtein_filter(vim.eval("a:items"), vim.eval("self.base"), vim.eval("a:thr"))')
+  endfunction "}}}
+
 else
-  function! s:match_filter(ctx, items) abort
-    return filter(a:items, 'ctx.match(v:val.word)')
-  endfunction
+
+  function! s:JWdistance(word, ...) dict abort "{{{
+    let base = get(a:000, 0, self.base)
+    return asyncomplete#preprocessor#ezfilter#JaroWinkler#distance(a:word, base)
+  endfunction "}}}
+
+  function! s:rDLdistance(word, ...) dict abort "{{{
+    let base = get(a:000, 0, self.base)
+    return asyncomplete#preprocessor#ezfilter#rDamerauLevenshtein#distance(a:word, base)
+  endfunction "}}}
+
+  function! s:match_filter(items) dict abort "{{{
+    return filter(a:items, 'self.match(v:val.word)')
+  endfunction "}}}
+
+  function! s:JWdistance_filter(items, thr) dict abort "{{{
+    let matchlist = self.match_filter(copy(a:items))
+    let fuzzymatchlist = filter(a:items, '!self.match(v:val.word) && self.JWdistance(v:val.word) <= a:thr')
+    return extend(matchlist, fuzzymatchlist)
+  endfunction "}}}
+
+  function! s:rDLdistance_filter(items, thr) dict abort "{{{
+    let matchlist = self.match_filter(copy(a:items))
+    let fuzzymatchlist = filter(a:items, '!self.match(v:val.word) && self.rDLdistance(v:val.word) <= a:thr')
+    return extend(matchlist, fuzzymatchlist)
+  endfunction "}}}
+
 endif
-"}}}
 
 
-function! s:JWdistance(item, ...) dict abort "{{{
-  let base = get(a:000, 0, self.base)
-  return asyncomplete#preprocessor#ezfilter#JaroWinkler#distance(a:item, base)
-endfunction "}}}
-
-
-function! s:rDLdistance(item, ...) dict abort "{{{
-  let base = get(a:000, 0, self.base)
-  return asyncomplete#preprocessor#ezfilter#rDamerauLevenshtein#distance(a:item, base)
+function! s:set_methods(ctx) abort "{{{
+  let matchpat = '^' . s:escape(a:ctx.base)
+  let a:ctx.match = {word -> word =~? matchpat}
+  let a:ctx.JWdistance = function('s:JWdistance')
+  let a:ctx.rDLdistance = function('s:rDLdistance')
+  let a:ctx.match_filter = function('s:match_filter')
+  let a:ctx.JW_filter = function('s:JWdistance_filter')
+  let a:ctx.rDL_filter = function('s:rDLdistance_filter')
+  return a:ctx
 endfunction "}}}
 
 
@@ -73,7 +111,7 @@ endfunction "}}}
 let g:asyncomplete#preprocessor#ezfilter#config =
   \ get(g:, 'asyncomplete#preprocessor#ezfilter#config', {})
 call extend(g:asyncomplete#preprocessor#ezfilter#config, {
-  \ '*': function('s:match_filter')}, 'keep')
+  \ '*': {ctx, items -> ctx.rDL_filter(items, 1)}}, 'keep')
 
 " vim:set foldmethod=marker:
 " vim:set commentstring="%s:

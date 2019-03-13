@@ -21,6 +21,7 @@ function! asyncomplete#preprocessor#ezfilter#rDamerauLevenshtein#distance(a, b) 
   return d[na][nb]
 endfunction "}}}
 
+
 function! s:distancemap(n) abort "{{{
   let d = [range(a:n + 1)]
   for i in range(1, a:n)

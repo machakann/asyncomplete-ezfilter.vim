@@ -1,26 +1,33 @@
 function! asyncomplete#preprocessor#ezfilter#JaroWinkler#similarity(a, b) abort "{{{
   " NOTE: Cannot apply for multi-byte strings
-  if a:a ==# '' || a:b ==# ''
+  if a:a ==# '' && a:b ==# ''
+    return 1.0
+  elseif a:a ==# '' || a:b ==# ''
     return 0.0
   elseif a:a ==? a:b
     return 1.0
   endif
+  let a = toupper(a:a)
+  let b = toupper(a:b)
   let na = strlen(a:a)
   let nb = strlen(a:b)
-  let [c, acommons, bcommons] = s:commonchar(a:a, a:b, na, nb)
+  let [c, acommons, bcommons] = s:commonchar(a, b, na, nb)
   if c == 0.0
     return 0.0
   endif
   let t = s:transposechar(acommons, bcommons)
   let dj = (c/na + c/nb + 1.0 - t/c)/3.0
-  let l = s:commonprefix(a:a, a:b, na, nb)
+  let l = s:commonprefix(a, b, na, nb)
   let p = 0.1
   let djw = dj + l*p*(1.0 - dj)
   return djw
 endfunction "}}}
+
+
 function! asyncomplete#preprocessor#ezfilter#JaroWinkler#distance(a, b) abort "{{{
   return 1.0 - asyncomplete#preprocessor#ezfilter#JaroWinkler#similarity(a:a, a:b)
 endfunction "}}}
+
 
 function! s:commonchar(a, b, na, nb) abort "{{{
   " NOTE: Cannot apply for multi-byte strings
@@ -33,14 +40,7 @@ function! s:commonchar(a, b, na, nb) abort "{{{
     while j <= i + window
       let start = j
       let j = stridx(a:b, a:a[i], start)
-      if j == -1
-        if a:a[i] =~# '[A-Z]'
-          let j = stridx(a:b, tolower(a:a[i]), start)
-        else
-          let j = stridx(a:b, toupper(a:a[i]), start)
-        endif
-      endif
-      if j == -1 || !count(bindexes, j, 1)
+      if j == -1 || !count(bindexes, j)
         break
       endif
       let j += 1
@@ -53,6 +53,8 @@ function! s:commonchar(a, b, na, nb) abort "{{{
   endfor
   return [c, acommons, map(sort(bindexes), 'a:b[v:val]')]
 endfunction "}}}
+
+
 function! s:transposechar(acommons, bcommons) abort "{{{
   let n = len(a:acommons)
   if n <= 1
@@ -60,12 +62,14 @@ function! s:transposechar(acommons, bcommons) abort "{{{
   endif
   let t = 0.0
   for i in range(n)
-    if a:acommons[i] !=? a:bcommons[i]
+    if a:acommons[i] !=# a:bcommons[i]
       let t += 1.0
     endif
   endfor
   return t/2
 endfunction "}}}
+
+
 function! s:commonprefix(a, b, na, nb) abort "{{{
   " NOTE: Cannot apply for multi-byte strings
   let l = 0

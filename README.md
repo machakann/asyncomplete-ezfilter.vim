@@ -6,13 +6,15 @@ This plugin provides the helper functions to build a custom preprocessor for [as
 
 ## Usage
 
-Put the funcref of `asyncomplete#preprocessor#ezfilter#filter` at the beginning of `g:asyncomplete_preprocessor`. Then, set filter functions for each complete-source with its name as a key of `g:asyncomplete#preprocessor#ezfilter#config`. If no particular filter function was assigned, the filter in the key `'*'` is used.
+This plugin aimed at filtering completion candidates by source specific filter functions.
+
+First, assign the funcref of `asyncomplete#preprocessor#ezfilter#filter` at the beginning of `g:asyncomplete_preprocessor`. Then, set filter functions for each complete-source with its name as a key of `g:asyncomplete#preprocessor#ezfilter#config`. If no particular filter function was assigned, the filter in the key `'*'` is used.
 
 The filter function should accept two arguments and return a list of completion items.
 
 The first arguments `ctx` has the context information. For example, `ctx.base` is the string just before the cursor. Additionally, the `ctx` has several useful methods for filtering, see the reference.
 
-The second arguments `items` is a list of complete items. It is a shallow copy of `matches.items` (Refer the help of asyncomplete.vim v2). Check out `:help complete-items` for the specification of a complete item.
+The second arguments `items` is a list of complete items. It is a shallow copy of `matches.items` (Refer the help of asyncomplete.vim v2). Check out `:help complete-items` for the specification of a completion item.
 
 
 ### Example
@@ -22,15 +24,15 @@ The second arguments `items` is a list of complete items. It is a shallow copy o
 ```vim
 let g:asyncomplete_preprocessor = [function('asyncomplete#preprocessor#ezfilter#filter')]
 
+let g:asyncomplete#preprocessor#ezfilter#config = {}
 let g:asyncomplete#preprocessor#ezfilter#config['*'] =
   \ {ctx, items -> filter(items, 'stridx(v:val.word, ctx.base) == 0')}
 ```
 
- * Use [asyncomplete-unicodesymbol](https://github.com/machakann/asyncomplete-unicodesymbol)
+ * Use [asyncomplete-unicodesymbol.vim](https://github.com/machakann/asyncomplete-unicodesymbol.vim)
 
 ```vim
 let g:asyncomplete_preprocessor = [function('asyncomplete#preprocessor#ezfilter#filter')]
-let g:asyncomplete#preprocessor#ezfilter#config = {}
 
 autocmd User asyncomplete_setup call asyncomplete#register_source(asyncomplete#sources#unicodesymbol#get_source_options({
   \ 'name': 'unicodesymbol',
@@ -38,6 +40,7 @@ autocmd User asyncomplete_setup call asyncomplete#register_source(asyncomplete#s
   \ 'completor': function('asyncomplete#sources#unicodesymbol#completor'),
   \ }))
 
+let g:asyncomplete#preprocessor#ezfilter#config = {}
 let g:asyncomplete#preprocessor#ezfilter#config.unicodesymbol =
   \ {ctx, items -> filter(items, 'ctx.match(v:val.menu)')}
 ```
@@ -46,14 +49,14 @@ let g:asyncomplete#preprocessor#ezfilter#config.unicodesymbol =
 
 ```vim
 let g:asyncomplete_preprocessor = [function('asyncomplete#preprocessor#ezfilter#filter')]
-let g:asyncomplete#preprocessor#ezfilter#config = {}
 
 autocmd User asyncomplete_setup call asyncomplete#register_source(asyncomplete#sources#Verdin#get_source_options({
   \ 'name': 'Verdin',
-  \ 'whitelist': ['vim'],
+  \ 'whitelist': ['vim', 'help'],
   \ 'completor': function('asyncomplete#sources#Verdin#completor'),
   \ }))
 
+let g:asyncomplete#preprocessor#ezfilter#config = {}
 let g:asyncomplete#preprocessor#ezfilter#config.Verdin =
   \ {ctx, items -> ctx.jw_filter(items, 0.2)}
 ```

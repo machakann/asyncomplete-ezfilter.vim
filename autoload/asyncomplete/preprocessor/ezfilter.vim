@@ -48,8 +48,8 @@ if s:python3_available
     return py3eval('asyncomplete_ezfilter.optimal_string_alignment_distance(vim.eval("a:word"), vim.eval("base"))')
   endfunction "}}}
 
-  function! s:match_filter(items) abort "{{{
-    return py3eval('asyncomplete_ezfilter.match_filter(vim.eval("a:items"), vim.eval("self.base"))')
+  function! s:filter(items) abort "{{{
+    return py3eval('asyncomplete_ezfilter.filter(vim.eval("a:items"), vim.eval("self.base"))')
   endfunction "}}}
 
   function! s:jw_filter(items, thr) dict abort "{{{
@@ -72,18 +72,18 @@ else
     return asyncomplete#preprocessor#ezfilter#OptimalStringAlignment#distance(a:word, base)
   endfunction "}}}
 
-  function! s:match_filter(items) dict abort "{{{
-    return filter(a:items, 'self.match(v:val.word)')
+  function! s:filter(items) dict abort "{{{
+    return filter(copy(items), 'self.match(v:val.word)')
   endfunction "}}}
 
   function! s:jw_filter(items, thr) dict abort "{{{
-    let matchlist = self.match_filter(copy(a:items))
+    let matchlist = self.filter(a:items)
     let fuzzymatchlist = filter(a:items, '!self.match(v:val.word) && self.jw_distance(v:val.word) <= a:thr')
     return extend(matchlist, fuzzymatchlist)
   endfunction "}}}
 
   function! s:osa_filter(items, thr) dict abort "{{{
-    let matchlist = self.match_filter(copy(a:items))
+    let matchlist = self.filter(a:items)
     let fuzzymatchlist = filter(a:items, '!self.match(v:val.word) && self.osa_distance(v:val.word) <= a:thr')
     return extend(matchlist, fuzzymatchlist)
   endfunction "}}}
@@ -96,7 +96,7 @@ function! s:set_methods(ctx) abort "{{{
   let a:ctx.match = {word -> word =~? matchpat}
   let a:ctx.jw_distance = function('s:jw_distance')
   let a:ctx.osa_distance = function('s:osa_distance')
-  let a:ctx.match_filter = function('s:match_filter')
+  let a:ctx.filter = function('s:filter')
   let a:ctx.jw_filter = function('s:jw_filter')
   let a:ctx.osa_filter = function('s:osa_filter')
   return a:ctx

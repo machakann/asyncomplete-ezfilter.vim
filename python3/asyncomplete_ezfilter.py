@@ -106,7 +106,7 @@ class AsyncompleteEzfilter:
             d[0][j] = j
         return d
 
-    # ristricted Damerau-Levenshtein distance by dynamic programming
+    # optimal string alignment distance by dynamic programming
     def _osa_distance_DP(self, a, b):
         na = len(a)
         nb = len(b)
@@ -135,7 +135,7 @@ class AsyncompleteEzfilter:
                     pm[j + 1] |= 1 << i
         return pm
 
-    # ristricted Damerau-Levenshtein distance by bit-parallel algorithm
+    # optimal string alignment distance by bit-parallel algorithm
     def _osa_distance_BP(self, a, b):
         pm = self._get_pattern_match_vector(a, b)
         vp = ~0
@@ -188,7 +188,8 @@ class AsyncompleteEzfilter:
                     lead, base)
                 if x['__DISTANCE__'] <= thr:
                     fuzzymatch.append(x)
-        fuzzymatch.sort(key=lambda x: x['__DISTANCE__'])
+        if thr > 1:
+            fuzzymatch.sort(key=lambda x: x['__DISTANCE__'])
         matchlist.extend(fuzzymatch)
         return matchlist
 

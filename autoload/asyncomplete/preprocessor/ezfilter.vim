@@ -73,7 +73,7 @@ else
   endfunction "}}}
 
   function! s:filter(items) dict abort "{{{
-    return filter(copy(items), 'self.match(v:val.word)')
+    return filter(copy(a:items), 'self.match(v:val.word)')
   endfunction "}}}
 
   function! s:jw_filter(items, thr) dict abort "{{{

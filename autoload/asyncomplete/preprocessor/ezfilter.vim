@@ -1,6 +1,9 @@
 let s:FALSE = 0
 let s:TRUE = 1
 
+let g:asyncomplete#preprocessor#ezfilter#python3 =
+  \ get(g:, 'asyncomplete#preprocessor#ezfilter#python3', s:TRUE)
+
 
 " check whether python 3 interface is available or not
 let s:python3_available = s:TRUE
@@ -12,13 +15,6 @@ if has('python3')
   endtry
 else
   let s:python3_available = s:FALSE
-endif
-
-
-" load python script if available
-if s:python3_available
-  py3 import vim
-  py3file <sfile>:h:h:h:h/python3/asyncomplete_ezfilter.py
 endif
 
 
@@ -35,11 +31,14 @@ function! asyncomplete#preprocessor#ezfilter#filter(ctx, matches) abort "{{{
 endfunction "}}}
 
 
-if s:python3_available
+if s:python3_available && g:asyncomplete#preprocessor#ezfilter#python3
 
-  function! s:jw_distance(word, ...) dict abort "{{{
-    let base = get(a:000, 0, self.base)
-    return py3eval('asyncomplete_ezfilter.jaro_winkler_distance(vim.eval("a:word"), vim.eval("base"))')
+  " load python script if available
+  py3 import vim
+  py3file <sfile>:h:h:h:h/python3/asyncomplete_ezfilter.py
+
+  function! s:jw_distance(word, base) abort "{{{
+    return py3eval('asyncomplete_ezfilter.jaro_winkler_distance(vim.eval("a:word"), vim.eval("a:base"))')
   endfunction "}}}
 
   function! s:osa_distance(word, ...) dict abort "{{{

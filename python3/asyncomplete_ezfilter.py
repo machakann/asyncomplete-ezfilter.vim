@@ -107,7 +107,7 @@ class AsyncompleteEzfilter:
         return d
 
     # ristricted Damerau-Levenshtein distance by dynamic programming
-    def _rDLdistance_DP(self, a, b):
+    def _osa_distance_DP(self, a, b):
         na = len(a)
         nb = len(b)
         d = self._distance_map(na, nb)
@@ -136,7 +136,7 @@ class AsyncompleteEzfilter:
         return pm
 
     # ristricted Damerau-Levenshtein distance by bit-parallel algorithm
-    def _rDLdistance_BP(self, a, b):
+    def _osa_distance_BP(self, a, b):
         pm = self._get_pattern_match_vector(a, b)
         vp = ~0
         vn = 0
@@ -156,7 +156,7 @@ class AsyncompleteEzfilter:
             vn = d0 & ((hp << 1) | 1)
         return dt
 
-    def ristricted_damerau_levenshtein_distance(self, a, b):
+    def optimal_string_alignment_distance(self, a, b):
         na = len(a)
         nb = len(b)
         if na == 0 or nb == 0:
@@ -165,9 +165,9 @@ class AsyncompleteEzfilter:
         b = b.upper()
         if a == b:
             return 0
-        return self._rDLdistance_BP(a, b)
+        return self._osa_distance_BP(a, b)
 
-    def ristricted_damerau_levenshtein_filter(self, items, base, thr):
+    def optimal_string_alignment_filter(self, items, base, thr):
         thr = float(thr)
         pat = re.compile(re.escape(base), re.I)
         matchlist = []
@@ -184,7 +184,7 @@ class AsyncompleteEzfilter:
         if n >= 3:
             for x in rest:
                 lead = x['word'][:n]
-                x['__DISTANCE__'] = self.ristricted_damerau_levenshtein_distance(
+                x['__DISTANCE__'] = self.optimal_string_alignment_distance(
                     lead, base)
                 if x['__DISTANCE__'] <= thr:
                     fuzzymatch.append(x)

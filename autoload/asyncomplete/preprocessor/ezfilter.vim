@@ -13,6 +13,7 @@ if has('python3')
 else
   let s:python3_available = s:FALSE
 endif
+let s:python3_available = 0
 
 
 " load python script if available
@@ -42,9 +43,9 @@ if s:python3_available
     return py3eval('asyncomplete_ezfilter.jaro_winkler_distance(vim.eval("a:word"), vim.eval("base"))')
   endfunction "}}}
 
-  function! s:rDLdistance(word, ...) dict abort "{{{
+  function! s:osa_distance(word, ...) dict abort "{{{
     let base = get(a:000, 0, self.base)
-    return py3eval('asyncomplete_ezfilter.ristricted_damerau_levenshtein_distance(vim.eval("a:word"), vim.eval("base"))')
+    return py3eval('asyncomplete_ezfilter.optimal_string_alignment_distance(vim.eval("a:word"), vim.eval("base"))')
   endfunction "}}}
 
   function! s:match_filter(items) abort "{{{
@@ -55,8 +56,8 @@ if s:python3_available
     return py3eval('asyncomplete_ezfilter.jaro_winkler_filter(vim.eval("a:items"), vim.eval("self.base"), vim.eval("a:thr"))')
   endfunction "}}}
 
-  function! s:rDLdistance_filter(items, thr) dict abort "{{{
-    return py3eval('asyncomplete_ezfilter.ristricted_damerau_levenshtein_filter(vim.eval("a:items"), vim.eval("self.base"), vim.eval("a:thr"))')
+  function! s:osa_filter(items, thr) dict abort "{{{
+    return py3eval('asyncomplete_ezfilter.optimal_string_alignment_filter(vim.eval("a:items"), vim.eval("self.base"), vim.eval("a:thr"))')
   endfunction "}}}
 
 else
@@ -66,9 +67,9 @@ else
     return asyncomplete#preprocessor#ezfilter#JaroWinkler#distance(a:word, base)
   endfunction "}}}
 
-  function! s:rDLdistance(word, ...) dict abort "{{{
+  function! s:osa_distance(word, ...) dict abort "{{{
     let base = get(a:000, 0, self.base)
-    return asyncomplete#preprocessor#ezfilter#rDamerauLevenshtein#distance(a:word, base)
+    return asyncomplete#preprocessor#ezfilter#OptimalStringAlignment#distance(a:word, base)
   endfunction "}}}
 
   function! s:match_filter(items) dict abort "{{{
@@ -81,9 +82,9 @@ else
     return extend(matchlist, fuzzymatchlist)
   endfunction "}}}
 
-  function! s:rDLdistance_filter(items, thr) dict abort "{{{
+  function! s:osa_filter(items, thr) dict abort "{{{
     let matchlist = self.match_filter(copy(a:items))
-    let fuzzymatchlist = filter(a:items, '!self.match(v:val.word) && self.rDLdistance(v:val.word) <= a:thr')
+    let fuzzymatchlist = filter(a:items, '!self.match(v:val.word) && self.osa_distance(v:val.word) <= a:thr')
     return extend(matchlist, fuzzymatchlist)
   endfunction "}}}
 
@@ -94,10 +95,10 @@ function! s:set_methods(ctx) abort "{{{
   let matchpat = '^' . s:escape(a:ctx.base)
   let a:ctx.match = {word -> word =~? matchpat}
   let a:ctx.jw_distance = function('s:jw_distance')
-  let a:ctx.rDLdistance = function('s:rDLdistance')
+  let a:ctx.osa_distance = function('s:osa_distance')
   let a:ctx.match_filter = function('s:match_filter')
   let a:ctx.jw_filter = function('s:jw_filter')
-  let a:ctx.rDL_filter = function('s:rDLdistance_filter')
+  let a:ctx.osa_filter = function('s:osa_filter')
   return a:ctx
 endfunction "}}}
 
@@ -111,7 +112,7 @@ endfunction "}}}
 let g:asyncomplete#preprocessor#ezfilter#config =
   \ get(g:, 'asyncomplete#preprocessor#ezfilter#config', {})
 call extend(g:asyncomplete#preprocessor#ezfilter#config, {
-  \ '*': {ctx, items -> ctx.rDL_filter(items, 1)}}, 'keep')
+  \ '*': {ctx, items -> ctx.osa_filter(items, 1)}}, 'keep')
 
 " vim:set foldmethod=marker:
 " vim:set commentstring="%s:

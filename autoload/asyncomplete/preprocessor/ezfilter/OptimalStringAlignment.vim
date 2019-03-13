@@ -1,4 +1,4 @@
-function! asyncomplete#preprocessor#ezfilter#rDamerauLevenshtein#distance(a, b) abort "{{{
+function! asyncomplete#preprocessor#ezfilter#OptimalStringAlignment#distance(a, b) abort "{{{
   " NOTE: Cannot apply for multi-byte strings
   let na = strchars(a:a)
   let nb = strchars(a:b)

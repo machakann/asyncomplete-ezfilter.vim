@@ -13,7 +13,6 @@ if has('python3')
 else
   let s:python3_available = s:FALSE
 endif
-let s:python3_available = 0
 
 
 " load python script if available

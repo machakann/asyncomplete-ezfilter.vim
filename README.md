@@ -84,3 +84,12 @@ Filter items in {items} by Jaro-Winkler distance; items with a distance larger t
  * ctx.osa_filter({items}, {thr})
 
 Filter items in {items} by optimal string alignment distance; items with a distance larger than {thr} are filtered out. Typically, 1 or 2 may work.
+
+
+## Note
+
+This plugin uses python3 interface if available. If you don't want, set a false value to `g:asyncomplete#preprocessor#ezfilter#python3`.
+
+```vim
+let g:asyncomplete#preprocessor#ezfilter#python3 = 0
+```

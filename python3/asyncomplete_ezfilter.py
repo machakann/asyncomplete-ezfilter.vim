@@ -76,26 +76,14 @@ class AsyncompleteEzfilter:
 
     def jaro_winkler_filter(self, items, base, thr):
         thr = float(thr)
-        pat = re.compile(re.escape(base), re.I)
-        matchlist = []
-        rest = []
-        for x in items:
-            if pat.match(x['word']):
-                x['__DISTANCE__'] = 0.0
-                matchlist.append(x)
-            else:
-                rest.append(x)
-
-        fuzzymatch = []
         n = len(base)
-        if n >= 3:
-            for x in rest:
-                lead = x['word'][:n]
-                x['__DISTANCE__'] = self.jaro_winkler_distance(lead, base)
-                if x['__DISTANCE__'] <= thr:
-                    fuzzymatch.append(x)
-        fuzzymatch.sort(key=lambda x: x['__DISTANCE__'])
-        matchlist.extend(fuzzymatch)
+        matchlist = []
+        for x in items:
+            lead = x['word'][:n]
+            x['_distance'] = self.jaro_winkler_distance(lead, base)
+            if x['_distance'] <= thr:
+                matchlist.append(x)
+        matchlist.sort(key=lambda x: x['_distance'])
         return matchlist
 
     def _distance_map(self, na, nb):
@@ -169,28 +157,14 @@ class AsyncompleteEzfilter:
 
     def optimal_string_alignment_filter(self, items, base, thr):
         thr = float(thr)
-        pat = re.compile(re.escape(base), re.I)
-        matchlist = []
-        rest = []
-        for x in items:
-            if pat.match(x['word']):
-                x['__DISTANCE__'] = 0
-                matchlist.append(x)
-            else:
-                rest.append(x)
-
-        fuzzymatch = []
         n = len(base)
-        if n >= 3:
-            for x in rest:
-                lead = x['word'][:n]
-                x['__DISTANCE__'] = self.optimal_string_alignment_distance(
-                    lead, base)
-                if x['__DISTANCE__'] <= thr:
-                    fuzzymatch.append(x)
-        if thr > 1:
-            fuzzymatch.sort(key=lambda x: x['__DISTANCE__'])
-        matchlist.extend(fuzzymatch)
+        matchlist = []
+        for x in items:
+            lead = x['word'][:n]
+            x['_distance'] = self.optimal_string_alignment_distance(lead, base)
+            if x['_distance'] <= thr:
+                matchlist.append(x)
+        matchlist.sort(key=lambda x: x['_distance'])
         return matchlist
 
 

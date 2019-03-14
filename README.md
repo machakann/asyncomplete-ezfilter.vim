@@ -1,25 +1,25 @@
 asyncomplete-ezfilter.vim
 =========================
 
-This plugin provides the helper functions to build a custom preprocessor for [asyncomplete.vim v2](https://github.com/prabirshrestha/asyncomplete.vim/pull/124).
+This plugin provides helper functions to build a custom preprocessor for [asyncomplete.vim v2](https://github.com/prabirshrestha/asyncomplete.vim/pull/124).
 
 
 ## Usage
 
 This plugin aimed at filtering completion candidates by source specific filter functions.
 
-First, assign the funcref of `asyncomplete#preprocessor#ezfilter#filter` at the beginning of `g:asyncomplete_preprocessor`. Then, set filter functions for each complete-source with its name as a key of `g:asyncomplete#preprocessor#ezfilter#config`. If no particular filter function was assigned, the filter in the key `'*'` is used.
+First, assign the funcref of `asyncomplete#preprocessor#ezfilter#filter` at the beginning of `g:asyncomplete_preprocessor`. Then, set filter functions for each complete-source with its name as a key of `g:asyncomplete#preprocessor#ezfilter#config`. If no particular filter function was assigned, the filter associated with the key `'*'` is used.
 
 The filter function should accept two arguments and return a list of completion items.
 
 The first arguments `ctx` has the context information. For example, `ctx.base` is the string just before the cursor. Additionally, the `ctx` has several useful methods for filtering, see the reference.
 
-The second arguments `items` is a list of complete items. It is a shallow copy of `matches.items` (Refer the help of asyncomplete.vim v2). Check out `:help complete-items` for the specification of a completion item.
+The second arguments `items` is a list of items to complete. It is a shallow copy of `matches.items` (Refer the help of asyncomplete.vim v2). Check out `:help complete-items` for the specification of a completion item.
 
 
 ### Example
 
- * Match strings case-sensitive
+ * Match items case-sensitive
 
 ```vim
 let g:asyncomplete_preprocessor = [function('asyncomplete#preprocessor#ezfilter#filter')]
@@ -45,7 +45,7 @@ let g:asyncomplete#preprocessor#ezfilter#config.unicodesymbol =
   \ {ctx, items -> filter(items, 'ctx.match(v:val.menu)')}
 ```
 
- * Use [vim-Verdin](https://github.com/machakann/vim-Verdin)
+ * Use [vim-Verdin](https://github.com/machakann/vim-Verdin) with fuzzy-matching
 
 ```vim
 let g:asyncomplete_preprocessor = [function('asyncomplete#preprocessor#ezfilter#filter')]
@@ -58,7 +58,7 @@ autocmd User asyncomplete_setup call asyncomplete#register_source(asyncomplete#s
 
 let g:asyncomplete#preprocessor#ezfilter#config = {}
 let g:asyncomplete#preprocessor#ezfilter#config.Verdin =
-  \ {ctx, items -> ctx.jw_filter(items, 0.2)}
+  \ {ctx, items -> ctx.jw_filter(items, 0.15)}
 ```
 
 
@@ -82,7 +82,7 @@ Filter items in {items} by forward-matching. This is an equivalent of `filter(co
 
  * ctx.jw_filter({items}, {thr})
 
-Filter items in {items} by Jaro-Winkler distance; items with a distance larger than {thr} are filtered out. Jaro-Winkler distance ranges from 0 to 1, typically 0.2 may work.
+Filter items in {items} by Jaro-Winkler distance; items with a distance larger than {thr} are filtered out. Jaro-Winkler distance ranges from 0 to 1, typically 0.15 may work.
 
  * ctx.osa_filter({items}, {thr})
 

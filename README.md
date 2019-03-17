@@ -24,7 +24,8 @@ The second arguments `items` is a list of items to complete. It is a shallow cop
  * Match items case-sensitive
 
 ```vim
-let g:asyncomplete_preprocessor = [function('asyncomplete#preprocessor#ezfilter#filter')]
+let g:asyncomplete_preprocessor =
+  \ [function('asyncomplete#preprocessor#ezfilter#filter')]
 
 let g:asyncomplete#preprocessor#ezfilter#config = {}
 let g:asyncomplete#preprocessor#ezfilter#config['*'] =
@@ -34,12 +35,14 @@ let g:asyncomplete#preprocessor#ezfilter#config['*'] =
  * Use [asyncomplete-unicodesymbol.vim](https://github.com/machakann/asyncomplete-unicodesymbol.vim)
 
 ```vim
-let g:asyncomplete_preprocessor = [function('asyncomplete#preprocessor#ezfilter#filter')]
+let g:asyncomplete_preprocessor =
+  \ [function('asyncomplete#preprocessor#ezfilter#filter')]
 
-autocmd User asyncomplete_setup call asyncomplete#register_source(asyncomplete#sources#unicodesymbol#get_source_options({
-  \ 'name': 'unicodesymbol',
-  \ 'whitelist': ['julia'],
-  \ 'completor': function('asyncomplete#sources#unicodesymbol#completor'),
+autocmd User asyncomplete_setup call asyncomplete#register_source(
+  \ asyncomplete#sources#unicodesymbol#get_source_options({
+  \   'name': 'unicodesymbol',
+  \   'whitelist': ['julia'],
+  \   'completor': function('asyncomplete#sources#unicodesymbol#completor'),
   \ }))
 
 let g:asyncomplete#preprocessor#ezfilter#config = {}
@@ -50,12 +53,14 @@ let g:asyncomplete#preprocessor#ezfilter#config.unicodesymbol =
  * Use [vim-Verdin](https://github.com/machakann/vim-Verdin) with fuzzy-matching
 
 ```vim
-let g:asyncomplete_preprocessor = [function('asyncomplete#preprocessor#ezfilter#filter')]
+let g:asyncomplete_preprocessor =
+  \ [function('asyncomplete#preprocessor#ezfilter#filter')]
 
-autocmd User asyncomplete_setup call asyncomplete#register_source(asyncomplete#sources#Verdin#get_source_options({
-  \ 'name': 'Verdin',
-  \ 'whitelist': ['vim', 'help'],
-  \ 'completor': function('asyncomplete#sources#Verdin#completor'),
+autocmd User asyncomplete_setup call asyncomplete#register_source(
+  \ asyncomplete#sources#Verdin#get_source_options({
+  \   'name': 'Verdin',
+  \   'whitelist': ['vim', 'vimspec', 'help'],
+  \   'completor': function('asyncomplete#sources#Verdin#completor'),
   \ }))
 
 let g:asyncomplete#preprocessor#ezfilter#config = {}

@@ -86,35 +86,6 @@ class AsyncompleteEzfilter:
         matchlist.sort(key=lambda x: x['_distance'])
         return matchlist
 
-    def _distance_map(self, na, nb):
-        d = [[0 for j in range(nb + 1)] for i in range(na + 1)]
-        for i in range(na + 1):
-            d[i][0] = i
-        for j in range(nb + 1):
-            d[0][j] = j
-        return d
-
-    # optimal string alignment distance by dynamic programming
-    def _osa_distance_DP(self, a, b):
-        na = len(a)
-        nb = len(b)
-        d = self._distance_map(na, nb)
-        for i in range(1, na + 1):
-            for j in range(1, nb + 1):
-                if a[i - 1] == b[j - 1]:
-                    const = 0
-                else:
-                    const = 1
-                if (i > 1 and j > 1 and a[i - 1] == b[i - 2]
-                        and a[i - 2] == b[i - 1]):
-                    d[i][j] = min(d[i - 1][j] + 1, d[i][j - 1] + 1,
-                                  d[i - 1][j - 1] + const,
-                                  d[i - 2][j - 2] + const)
-                else:
-                    d[i][j] = min(d[i - 1][j] + 1, d[i][j - 1] + 1,
-                                  d[i - 1][j - 1] + const)
-        return d[na][nb]
-
     def _get_pattern_match_vector(self, a, b):
         pm = [0 for i in range(len(b) + 1)]
         for i, _a in enumerate(a):

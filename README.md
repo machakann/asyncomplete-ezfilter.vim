@@ -1,6 +1,8 @@
 asyncomplete-ezfilter.vim
 =========================
 
+[![Build Status](https://travis-ci.org/machakann/asyncomplete-ezfilter.vim.svg?branch=master)](https://travis-ci.org/machakann/asyncomplete-ezfilter.vim)
+
 This plugin provides helper functions to build a custom preprocessor for [asyncomplete.vim v2](https://github.com/prabirshrestha/asyncomplete.vim/pull/124).
 
 

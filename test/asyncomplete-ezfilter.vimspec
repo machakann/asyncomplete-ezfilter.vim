@@ -1,0 +1,64 @@
+" Use assert commands without any prefix
+call themis#helper('command').with(g:assert)
+
+" Access to the local scopes
+let s:scope = themis#helper('scope')
+let g:ezfilter = s:scope.funcs('autoload/asyncomplete/preprocessor/ezfilter.vim')
+
+Describe ezfilter
+  Context JaroWinkler#distance(a, b)
+    It returns a Jaro-Winkler distance
+      Assert Compare(asyncomplete#preprocessor#ezfilter#JaroWinkler#distance('RICK',   'RICK')     - 0.0,   '<', 0.0001)
+      Assert Compare(asyncomplete#preprocessor#ezfilter#JaroWinkler#distance('MARTHA', 'MARHTA')   - 0.039, '<', 0.0001)
+      Assert Compare(asyncomplete#preprocessor#ezfilter#JaroWinkler#distance('DWAYNE', 'DUANE')    - 0.16,  '<', 0.0001)
+      Assert Compare(asyncomplete#preprocessor#ezfilter#JaroWinkler#distance('DIXON',  'DICKSONX') - 0.187, '<', 0.0001)
+      Assert Compare(asyncomplete#preprocessor#ezfilter#JaroWinkler#distance('ABCDE',  'FGHIJ')    - 1.0,   '<', 0.0001)
+    End
+  End
+
+  Context OptimalStringAlignment#distance(a, b)
+    It returns a Optimal String Alignment distance
+      Assert Equals(asyncomplete#preprocessor#ezfilter#OptimalStringAlignment#distance('RICK',   'RICK'),     0)
+      Assert Equals(asyncomplete#preprocessor#ezfilter#OptimalStringAlignment#distance('MARTHA', 'MARHTA'),   1)
+      Assert Equals(asyncomplete#preprocessor#ezfilter#OptimalStringAlignment#distance('DWAYNE', 'DUANE'),    2)
+      Assert Equals(asyncomplete#preprocessor#ezfilter#OptimalStringAlignment#distance('DIXON',  'DICKSONX'), 4)
+      Assert Equals(asyncomplete#preprocessor#ezfilter#OptimalStringAlignment#distance('ABCDE',  'FGHIJ'),    5)
+    End
+  End
+
+  Context s:filter(items, base)
+    It filters items by forward-matching
+      Assert Equals(map(g:ezfilter.filter(
+        \ [{'word': 'MARSHALL'}, {'word': 'MARTHA'}, {'word': 'MARHTA'}, {'word': 'MARSHAL'}], 'MAR'), 'v:val.word'),
+        \ ['MARSHALL', 'MARTHA', 'MARHTA', 'MARSHAL'])
+
+      Assert Equals(map(g:ezfilter.filter(
+        \ [{'word': 'MARSHALL'}, {'word': 'MARTHA'}, {'word': 'MARHTA'}, {'word': 'MARSHAL'}], 'MART'), 'v:val.word'),
+        \ ['MARTHA'])
+
+      Assert Equals(map(g:ezfilter.filter(
+        \ [{'word': 'MARSHALL'}, {'word': 'MARTHA'}, {'word': 'MARHTA'}, {'word': 'MARSHAL'}], 'MARTHA'), 'v:val.word'),
+        \ ['MARTHA'])
+
+      Assert Equals(map(g:ezfilter.filter(
+        \ [{'word': 'MARSHALL'}, {'word': 'MARTHA'}, {'word': 'MARHTA'}, {'word': 'MARSHAL'}], 'MARTHAN'), 'v:val.word'),
+        \ [])
+    End
+  End
+
+  Context s:jw_filter(items, base, thr)
+    It filters items by Jaro-Winkler distance
+      Assert Equals(map(g:ezfilter.jw_filter(
+        \ [{'word': 'MARSHALL'}, {'word': 'MARTHA'}, {'word': 'MARHTA'}, {'word': 'MARSHAL'}], 'MARTHA', 0.11), 'v:val.word'),
+        \ ['MARTHA', 'MARHTA', 'MARSHAL'])
+    End
+  End
+
+  Context s:osa_filter(items, base, thr)
+    It filters items by optimal string alignment distance
+      Assert Equals(map(g:ezfilter.osa_filter(
+        \ [{'word': 'MARSHALL'}, {'word': 'MARTHA'}, {'word': 'MARHTA'}, {'word': 'MARSHAL'}], 'MARTHA', 2), 'v:val.word'),
+        \ ['MARTHA', 'MARHTA', 'MARSHAL'])
+    End
+  End
+End

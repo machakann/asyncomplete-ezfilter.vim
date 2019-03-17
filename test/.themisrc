@@ -1,0 +1,5 @@
+set encoding=utf-8
+execute 'set runtimepath+=' . expand('<sfile>:p:h:h')
+set noswapfile
+let g:assert = themis#helper('assert')
+let g:asyncomplete#preprocessor#ezfilter#python3 = 0

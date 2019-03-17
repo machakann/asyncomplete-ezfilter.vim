@@ -26,6 +26,7 @@ class AsyncompleteEzfilter:
                 acommons.append(a[i])
                 bindexes.append(j)
                 c += 1.0
+        bindexes.sort()
         return [c, acommons, [b[j] for j in bindexes]]
 
     def _transposechar(self, acommons, bcommons):
@@ -36,7 +37,7 @@ class AsyncompleteEzfilter:
         for i in range(n):
             if acommons[i] != bcommons[i]:
                 t += 1.0
-        return math.floor(t / 2)
+        return t / 2
 
     def _commonprefix(self, a, b):
         na = len(a)

@@ -1,4 +1,3 @@
-import math
 import re
 
 
@@ -10,7 +9,7 @@ class AsyncompleteEzfilter:
     def _commonchar(self, a, b):
         na = len(a)
         nb = len(b)
-        window = math.floor(max(na, nb, 4) / 2) - 1
+        window = (max(na, nb, 4) // 2) - 1
         c = 0.0
         acommons = []
         bindexes = []

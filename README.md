@@ -21,6 +21,17 @@ The second arguments `items` is a list of items to complete. It is a shallow cop
 
 ### Example
 
+ * Match items case-insensitive
+
+```vim
+let g:asyncomplete_preprocessor =
+  \ [function('asyncomplete#preprocessor#ezfilter#filter')]
+
+let g:asyncomplete#preprocessor#ezfilter#config = {}
+let g:asyncomplete#preprocessor#ezfilter#config['*'] =
+  \ {ctx, items -> filter(items, 'ctx.match(v:val.word)')}
+```
+
  * Match items case-sensitive
 
 ```vim

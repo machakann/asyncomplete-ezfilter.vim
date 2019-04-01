@@ -76,7 +76,7 @@ autocmd User asyncomplete_setup call asyncomplete#register_source(
 
 let g:asyncomplete#preprocessor#ezfilter#config = {}
 let g:asyncomplete#preprocessor#ezfilter#config.Verdin =
-  \ {ctx, items -> ctx.jw_filter(items, 0.15)}
+  \ {ctx, items -> ctx.osa_filter(items, 1)}
 ```
 
 

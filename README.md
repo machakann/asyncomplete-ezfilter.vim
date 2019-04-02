@@ -3,7 +3,7 @@ asyncomplete-ezfilter.vim
 
 [![Build Status](https://travis-ci.org/machakann/asyncomplete-ezfilter.vim.svg?branch=master)](https://travis-ci.org/machakann/asyncomplete-ezfilter.vim)
 
-This plugin provides helper functions to build a custom preprocessor for [asyncomplete.vim v2](https://github.com/prabirshrestha/asyncomplete.vim/pull/124).
+This plugin provides helper functions to build a custom preprocessor for [asyncomplete.vim](https://github.com/prabirshrestha/asyncomplete.vim).
 
 
 ## Usage
@@ -16,7 +16,7 @@ The filter function should accept two arguments and return a list of completion 
 
 The first arguments `ctx` has the context information. For example, `ctx.base` is the string just before the cursor. Additionally, the `ctx` has several useful methods for filtering, see the reference.
 
-The second arguments `items` is a list of items to complete. It is a shallow copy of `matches.items` (Refer the help of asyncomplete.vim v2). Check out `:help complete-items` for the specification of a completion item.
+The second arguments `items` is a list of items to complete. It is a shallow copy of `matches.items` (Refer the help of asyncomplete.vim). Check out `:help complete-items` for the specification of a completion item.
 
 
 ### Example

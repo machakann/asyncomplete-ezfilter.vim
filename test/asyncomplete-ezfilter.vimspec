@@ -50,7 +50,7 @@ Describe ezfilter
     It filters items by Jaro-Winkler distance
       Assert Equals(map(g:ezfilter.jw_filter(
         \ [{'word': 'MARSHALL'}, {'word': 'MARTHA'}, {'word': 'MARHTA'}, {'word': 'MARSHAL'}], 'MARTHA', 0.11), 'v:val.word'),
-        \ ['MARTHA', 'MARHTA', 'MARSHAL'])
+        \ ['MARTHA', 'MARHTA', 'MARSHALL', 'MARSHAL'])
     End
   End
 
@@ -58,7 +58,7 @@ Describe ezfilter
     It filters items by optimal string alignment distance
       Assert Equals(map(g:ezfilter.osa_filter(
         \ [{'word': 'MARSHALL'}, {'word': 'MARTHA'}, {'word': 'MARHTA'}, {'word': 'MARSHAL'}], 'MARTHA', 2), 'v:val.word'),
-        \ ['MARTHA', 'MARHTA', 'MARSHAL'])
+        \ ['MARTHA', 'MARSHALL', 'MARHTA', 'MARSHAL'])
     End
   End
 End

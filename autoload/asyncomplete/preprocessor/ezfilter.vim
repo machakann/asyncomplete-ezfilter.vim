@@ -73,9 +73,11 @@ else
   endfunction "}}}
 
   function! s:jw_filter(items, base, thr) abort "{{{
+    let n = strlen(a:base)
     let matchlist = copy(a:items)
     for item in matchlist
-      let item._distance = s:jw_distance(item.word, a:base)
+      let word = strcharpart(item.word, 0, n)
+      let item._distance = s:jw_distance(word, a:base)
     endfor
     call filter(matchlist, 'v:val._distance <= a:thr')
     call sort(matchlist, 's:compare_distance')
@@ -83,9 +85,11 @@ else
   endfunction "}}}
 
   function! s:osa_filter(items, base, thr) abort "{{{
+    let n = strlen(a:base)
     let matchlist = copy(a:items)
     for item in matchlist
-      let item._distance = s:osa_distance(item.word, a:base)
+      let word = strcharpart(item.word, 0, n)
+      let item._distance = s:osa_distance(word, a:base)
     endfor
     call filter(matchlist, 'v:val._distance <= a:thr')
     call sort(matchlist, 's:compare_distance')

@@ -26,7 +26,8 @@ class AsyncompleteEzfilter:
                 bindexes.append(j)
                 c += 1.0
         bindexes.sort()
-        return [c, acommons, [b[j] for j in bindexes]]
+        bcommons = [b[j] for j in bindexes]
+        return [c, acommons, bcommons]
 
     def _transposechar(self, acommons, bcommons):
         n = len(acommons)

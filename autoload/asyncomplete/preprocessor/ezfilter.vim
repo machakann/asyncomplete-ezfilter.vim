@@ -6,15 +6,12 @@ let g:asyncomplete#preprocessor#ezfilter#python3 =
 
 
 " check whether python 3 interface is available or not
-let s:python3_available = s:TRUE
-if has('python3')
+let s:python3_available = s:FALSE
+if g:asyncomplete#preprocessor#ezfilter#python3 && has('python3')
   try
-    call py3eval('1')
+    let s:python3_available = py3eval('1')
   catch
-    let s:python3_available = s:FALSE
   endtry
-else
-  let s:python3_available = s:FALSE
 endif
 
 

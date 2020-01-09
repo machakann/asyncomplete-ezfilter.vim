@@ -128,7 +128,7 @@ endfunction "}}}
 let g:asyncomplete#preprocessor#ezfilter#config =
   \ get(g:, 'asyncomplete#preprocessor#ezfilter#config', {})
 call extend(g:asyncomplete#preprocessor#ezfilter#config,
-  \ {'*': {ctx, items -> ctx.osa_filter(items, 1)}}, 'keep')
+  \ {'*': {ctx, items -> ctx.filter(items)}}, 'keep')
 
 " vim:set foldmethod=marker:
 " vim:set commentstring="%s:

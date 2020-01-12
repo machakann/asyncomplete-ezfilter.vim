@@ -43,7 +43,7 @@ if s:python3_available && g:asyncomplete#preprocessor#ezfilter#python3
   endfunction "}}}
 
   function! s:filter(items, base) abort "{{{
-    return py3eval('asyncomplete_ezfilter.filter(vim.eval("a:items"), vim.eval("a:base"))')
+    return py3eval('asyncomplete_ezfilter.match_filter(vim.eval("a:items"), vim.eval("a:base"))')
   endfunction "}}}
 
   function! s:jw_filter(items, base, thr) abort "{{{

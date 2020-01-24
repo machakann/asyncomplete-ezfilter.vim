@@ -14,9 +14,9 @@ First, assign the funcref of `asyncomplete#preprocessor#ezfilter#filter` at the 
 
 The filter function should accept two arguments and return a list of completion items.
 
-The first arguments `ctx` has the context information. For example, `ctx.base` is the string just before the cursor. Additionally, the `ctx` has several useful methods for filtering, see the reference.
+The first argument `ctx` has the context information. For example, `ctx.base` is the string just before the cursor. Additionally, the `ctx` has several useful methods for filtering, see the reference.
 
-The second arguments `items` is a list of items to complete. It is a shallow copy of `matches.items` (Refer the help of asyncomplete.vim). Check out `:help complete-items` for the specification of a completion item.
+The second argument `items` is a list of items to complete. It is a shallow copy of `matches.items` (Refer the help of asyncomplete.vim). Check out `:help complete-items` for the specification of a completion item.
 
 
 ### Example

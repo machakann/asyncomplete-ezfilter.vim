@@ -1,0 +1,120 @@
+*asyncomplete-ezfilter.txt*
+						Last change:24-Jan-2020.
+
+Author  : machakann <https://github.com/machakann>
+License : MIT license
+Requirement:
+	Vim 8.0 or higher
+	asyncomplete.vim (https://github.com/prabirshrestha/asyncomplete.vim)
+
+==============================================================================
+USAGE				*asyncomplete-ezfilter-usage*
+
+This plugin provides helper functions to build a custom preprocessor for
+asyncomplete.vim and is aimed at filtering completion candidates by source
+specific filter functions.
+
+				*asyncomplete#preprocessor#ezfilter#filter*
+First, assign the funcref of |asyncomplete#preprocessor#ezfilter#filter| at
+the beginning of |g:asyncomplete_preprocessor|.
+>
+	let g:asyncomplete_preprocessor =
+	\ [function('asyncomplete#preprocessor#ezfilter#filter')]
+<
+				*g:asyncomplete#preprocessor#ezfilter#config*
+Next, define a dictionary named |g:asyncomplete#preprocessor#ezfilter#config|.
+>
+	let g:asyncomplete#preprocessor#ezfilter#config = {}
+<
+This is the place to set filter functions for each complete-source with its
+name as a key. If no particular filter function was assigned, the filter
+associated with the key '*' is used.
+
+  - Match items case-insensitive >
+	let g:asyncomplete#preprocessor#ezfilter#config['*'] =
+	\ {ctx, items -> filter(items, 'ctx.match(v:val.word)')}
+<
+  - Match items case-sensitive >
+	let g:asyncomplete#preprocessor#ezfilter#config['*'] =
+	\ {ctx, items -> filter(items, 'stridx(v:val.word, ctx.base) == 0')}
+<
+  - Use asyncomplete-unicodesymbol.vim >
+	let g:asyncomplete#preprocessor#ezfilter#config.unicodesymbol =
+	\ {ctx, items -> filter(items, 'ctx.match(v:val.menu)')}
+
+	autocmd User asyncomplete_setup call asyncomplete#register_source(
+	\ asyncomplete#sources#unicodesymbol#get_source_options({
+	\   'name': 'unicodesymbol',
+	\   'whitelist': ['julia'],
+	\   'completor':
+	\      function('asyncomplete#sources#unicodesymbol#completor'),
+	\ }))
+<
+  - Use vim-Verdin with fuzzy-matching >
+	let g:asyncomplete#preprocessor#ezfilter#config.Verdin =
+	\ {ctx, items -> ctx.osa_filter(items, 1)}
+
+	autocmd User asyncomplete_setup call asyncomplete#register_source(
+	\ asyncomplete#sources#Verdin#get_source_options({
+	\   'name': 'Verdin',
+	\   'whitelist': ['vim', 'vimspec', 'help'],
+	\   'completor': function('asyncomplete#sources#Verdin#completor'),
+	\ }))
+<
+The filter function should accept two arguments and return a list of
+completion items.
+
+The first argument `ctx` has the context information. For example, `ctx.base`
+is the string just before the cursor. Additionally, the `ctx` has several
+useful methods for filtering, read the next section.
+
+The second argument `items` is a list of items to complete. It is a shallow
+copy of `l:matches['items']`. (Read |g:asyncomplete_preprocessor|). Check out
+the |complete-items| section of :help for the specification of each item.
+
+------------------------------------------------------------------------------
+				*asyncomplete-ezfilter-ctx-methods*
+Methods of ctx~
+
+ctx.match({item})
+	Return 1 if {item}.word is forward-matched with ctx.base, otherwise 0.
+
+ctx.jw_distance({item}[, {base}])
+	Return the Jaro-Winker distance between the two string {item} and
+	{base}. Jaro-Winkler distance ranges from 0 to 1, smaller is similar.
+	ctx.base is used as {base} if it is omitted.
+
+ctx.osa_distance({item}[, {base}])
+	Return the ristricted Damerau-Levenshtein distance (Optimal string
+	alignment distance) between the two string {item} and {base}.
+	Ristricted Damerau-Levenshtein distance represents the number of edit
+	to make the two strings equal by deletion, insertion, substitution or
+	transposition. Smaller is similar. ctx.base is used as {base} if it is
+	omitted.
+
+ctx.filter({items})
+	Filter items in {items} by forward-matching. This is an equivalent of
+	filter(copy({items}), 'ctx.match(v:val.word)') but might be faster if
+	python3 interface is available.
+
+ctx.jw_filter({items}, {thr})
+	Filter items in {items} by Jaro-Winkler distance; items with a
+	distance larger than {thr} are filtered out. Jaro-Winkler distance
+	ranges from 0 to 1, typically 0.15 may work.
+
+ctx.osa_filter({items}, {thr})
+	Filter items in {items} by optimal string alignment distance; items
+	with a distance larger than {thr} are filtered out. Typically, 1 or 2
+	may work.
+
+==============================================================================
+NOTICE				*asyncomplete-ezfilter-notice*
+
+				*g:asyncomplete#preprocessor#ezfilter#python3*
+This plugin uses python3 interface if available. If you don't want, set a
+false value to |g:asyncomplete#preprocessor#ezfilter#python3|.
+>
+	let g:asyncomplete#preprocessor#ezfilter#python3 = 0
+<
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:noet:

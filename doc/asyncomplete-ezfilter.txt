@@ -1,5 +1,5 @@
 *asyncomplete-ezfilter.txt*
-						Last change:24-Jan-2020.
+						Last change:10-Feb-2020.
 
 Author  : machakann <https://github.com/machakann>
 License : MIT license
@@ -32,11 +32,11 @@ associated with the key '*' is used.
 
   - Match items case-insensitive >
 	let g:asyncomplete#preprocessor#ezfilter#config['*'] =
-	\ {ctx, items -> filter(items, 'ctx.match(v:val.word)')}
+	\ {ctx, items -> ctx.filter(items)}
 <
   - Match items case-sensitive >
 	let g:asyncomplete#preprocessor#ezfilter#config['*'] =
-	\ {ctx, items -> filter(items, 'stridx(v:val.word, ctx.base) == 0')}
+	\ {ctx, items -> ctx.filter(items, 0)}
 <
   - Use asyncomplete-unicodesymbol.vim >
 	let g:asyncomplete#preprocessor#ezfilter#config.unicodesymbol =
@@ -69,43 +69,55 @@ is the string just before the cursor. Additionally, the `ctx` has several
 useful methods for filtering, read the next section.
 
 The second argument `items` is a list of items to complete. It is a shallow
-copy of `l:matches['items']`. (Read |g:asyncomplete_preprocessor|). Check out
+copy of `l:matches["items"]`. (Read |g:asyncomplete_preprocessor|). Check out
 the |complete-items| section of :help for the specification of each item.
 
 ------------------------------------------------------------------------------
 				*asyncomplete-ezfilter-ctx-methods*
 Methods of ctx~
 
-ctx.match({item})
+ctx.match({item} [, {ic}])
 	Return 1 if {item}.word is forward-matched with ctx.base, otherwise 0.
+	This method ignores case in default; it can be case-sensitive only
+	when {ic} is given and it is |FALSE|, however.
 
-ctx.jw_distance({item}[, {base}])
+ctx.jw_distance({item} [, {base} [, {ic}]])
 	Return the Jaro-Winker distance between the two string {item} and
 	{base}. Jaro-Winkler distance ranges from 0 to 1, smaller is similar.
 	ctx.base is used as {base} if it is omitted.
+	This method ignores case in default; it can be case-sensitive only
+	when {ic} is given and it is |FALSE|, however.
 
-ctx.osa_distance({item}[, {base}])
+ctx.osa_distance({item} [, {base} [, {ic}]])
 	Return the ristricted Damerau-Levenshtein distance (Optimal string
 	alignment distance) between the two string {item} and {base}.
 	Ristricted Damerau-Levenshtein distance represents the number of edit
 	to make the two strings equal by deletion, insertion, substitution or
 	transposition. Smaller is similar. ctx.base is used as {base} if it is
 	omitted.
+	This method ignores case in default; it can be case-sensitive only
+	when {ic} is given and it is |FALSE|, however.
 
-ctx.filter({items})
+ctx.filter({items} [, {ic}])
 	Filter items in {items} by forward-matching. This is an equivalent of
 	filter(copy({items}), 'ctx.match(v:val.word)') but might be faster if
 	python3 interface is available.
+	This method ignores case in default; it can be case-sensitive only
+	when {ic} is given and it is |FALSE|, however.
 
-ctx.jw_filter({items}, {thr})
+ctx.jw_filter({items}, {thr} [, {ic}])
 	Filter items in {items} by Jaro-Winkler distance; items with a
 	distance larger than {thr} are filtered out. Jaro-Winkler distance
 	ranges from 0 to 1, typically 0.15 may work.
+	This method ignores case in default; it can be case-sensitive only
+	when {ic} is given and it is |FALSE|, however.
 
-ctx.osa_filter({items}, {thr})
+ctx.osa_filter({items}, {thr} [, {ic}])
 	Filter items in {items} by optimal string alignment distance; items
 	with a distance larger than {thr} are filtered out. Typically, 1 or 2
 	may work.
+	This method ignores case in default; it can be case-sensitive only
+	when {ic} is given and it is |FALSE|, however.
 
 ==============================================================================
 NOTICE				*asyncomplete-ezfilter-notice*

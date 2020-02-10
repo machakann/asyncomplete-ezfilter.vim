@@ -2,47 +2,72 @@
 call themis#helper('command').with(g:assert)
 
 " Access to the local scopes
+let g:asyncomplete#preprocessor#ezfilter#python3 = 0
 let s:scope = themis#helper('scope')
 let g:ezfilter = s:scope.funcs('autoload/asyncomplete/preprocessor/ezfilter.vim')
 
 Describe ezfilter
   Context JaroWinkler#distance(a, b)
     It returns a Jaro-Winkler distance
-      Assert Compare(asyncomplete#preprocessor#ezfilter#JaroWinkler#distance('RICK',   'RICK')     - 0.0,   '<', 0.0001)
-      Assert Compare(asyncomplete#preprocessor#ezfilter#JaroWinkler#distance('MARTHA', 'MARHTA')   - 0.039, '<', 0.0001)
-      Assert Compare(asyncomplete#preprocessor#ezfilter#JaroWinkler#distance('DWAYNE', 'DUANE')    - 0.16,  '<', 0.0001)
-      Assert Compare(asyncomplete#preprocessor#ezfilter#JaroWinkler#distance('DIXON',  'DICKSONX') - 0.187, '<', 0.0001)
-      Assert Compare(asyncomplete#preprocessor#ezfilter#JaroWinkler#distance('ABCDE',  'FGHIJ')    - 1.0,   '<', 0.0001)
+      Assert Compare(g:ezfilter.jw_distance('RICK',   'RICK')     - 0.0,   '<', 0.0001)
+      Assert Compare(g:ezfilter.jw_distance('MARTHA', 'MARHTA')   - 0.039, '<', 0.0001)
+      Assert Compare(g:ezfilter.jw_distance('DWAYNE', 'DUANE')    - 0.16,  '<', 0.0001)
+      Assert Compare(g:ezfilter.jw_distance('DIXON',  'DICKSONX') - 0.187, '<', 0.0001)
+      Assert Compare(g:ezfilter.jw_distance('ABCDE',  'FGHIJ')    - 1.0,   '<', 0.0001)
+    End
+
+    It switches case-sensitive/insensitive by the optional argument
+      Assert Compare(g:ezfilter.jw_distance('abc', 'ABC') - 0.0,    '<', 0.0001)
+      Assert Compare(g:ezfilter.jw_distance('abc', 'ABC', 1) - 0.0, '<', 0.0001)
+      Assert Compare(g:ezfilter.jw_distance('abc', 'ABC', 0) - 1.0, '<', 0.0001)
     End
   End
 
   Context OptimalStringAlignment#distance(a, b)
     It returns a Optimal String Alignment distance
-      Assert Equals(asyncomplete#preprocessor#ezfilter#OptimalStringAlignment#distance('RICK',   'RICK'),     0)
-      Assert Equals(asyncomplete#preprocessor#ezfilter#OptimalStringAlignment#distance('MARTHA', 'MARHTA'),   1)
-      Assert Equals(asyncomplete#preprocessor#ezfilter#OptimalStringAlignment#distance('DWAYNE', 'DUANE'),    2)
-      Assert Equals(asyncomplete#preprocessor#ezfilter#OptimalStringAlignment#distance('DIXON',  'DICKSONX'), 4)
-      Assert Equals(asyncomplete#preprocessor#ezfilter#OptimalStringAlignment#distance('ABCDE',  'FGHIJ'),    5)
+      Assert Equals(g:ezfilter.osa_distance('RICK',   'RICK'),     0)
+      Assert Equals(g:ezfilter.osa_distance('MARTHA', 'MARHTA'),   1)
+      Assert Equals(g:ezfilter.osa_distance('DWAYNE', 'DUANE'),    2)
+      Assert Equals(g:ezfilter.osa_distance('DIXON',  'DICKSONX'), 4)
+      Assert Equals(g:ezfilter.osa_distance('ABCDE',  'FGHIJ'),    5)
+    End
+
+    It switches case-sensitive/insensitive by the optional argument
+      Assert Equals(g:ezfilter.osa_distance('abc', 'ABC'),    0)
+      Assert Equals(g:ezfilter.osa_distance('abc', 'ABC', 1), 0)
+      Assert Equals(g:ezfilter.osa_distance('abc', 'ABC', 0), 3)
     End
   End
 
   Context s:filter(items, base)
     It filters items by forward-matching
       Assert Equals(map(g:ezfilter.filter(
-        \ [{'word': 'MARSHALL'}, {'word': 'MARTHA'}, {'word': 'MARHTA'}, {'word': 'MARSHAL'}], 'MAR'), 'v:val.word'),
-        \ ['MARSHALL', 'MARTHA', 'MARHTA', 'MARSHAL'])
+      \ [{'word': 'MARSHALL'}, {'word': 'MARTHA'}, {'word': 'MARHTA'}, {'word': 'MARSHAL'}], 'MAR'), 'v:val.word'),
+      \ ['MARSHALL', 'MARTHA', 'MARHTA', 'MARSHAL'])
 
       Assert Equals(map(g:ezfilter.filter(
-        \ [{'word': 'MARSHALL'}, {'word': 'MARTHA'}, {'word': 'MARHTA'}, {'word': 'MARSHAL'}], 'MART'), 'v:val.word'),
-        \ ['MARTHA'])
+      \ [{'word': 'MARSHALL'}, {'word': 'MARTHA'}, {'word': 'MARHTA'}, {'word': 'MARSHAL'}], 'MART'), 'v:val.word'),
+      \ ['MARTHA'])
 
       Assert Equals(map(g:ezfilter.filter(
-        \ [{'word': 'MARSHALL'}, {'word': 'MARTHA'}, {'word': 'MARHTA'}, {'word': 'MARSHAL'}], 'MARTHA'), 'v:val.word'),
-        \ ['MARTHA'])
+      \ [{'word': 'MARSHALL'}, {'word': 'MARTHA'}, {'word': 'MARHTA'}, {'word': 'MARSHAL'}], 'MARTHA'), 'v:val.word'),
+      \ ['MARTHA'])
 
       Assert Equals(map(g:ezfilter.filter(
-        \ [{'word': 'MARSHALL'}, {'word': 'MARTHA'}, {'word': 'MARHTA'}, {'word': 'MARSHAL'}], 'MARTHAN'), 'v:val.word'),
-        \ [])
+      \ [{'word': 'MARSHALL'}, {'word': 'MARTHA'}, {'word': 'MARHTA'}, {'word': 'MARSHAL'}], 'MARTHAN'), 'v:val.word'),
+      \ [])
+    End
+
+    It switches case-sensitive/insensitive by the optional argument
+      Assert Equals(map(g:ezfilter.filter(
+      \ [{'word': 'abc'}, {'word': 'Abc'}, {'word': 'ABc'}, {'word': 'ABC'}], 'abc'), 'v:val.word'),
+      \ ['abc', 'Abc', 'ABc', 'ABC'])
+      Assert Equals(map(g:ezfilter.filter(
+      \ [{'word': 'abc'}, {'word': 'Abc'}, {'word': 'ABc'}, {'word': 'ABC'}], 'abc', 1), 'v:val.word'),
+      \ ['abc', 'Abc', 'ABc', 'ABC'])
+      Assert Equals(map(g:ezfilter.filter(
+      \ [{'word': 'abc'}, {'word': 'Abc'}, {'word': 'ABc'}, {'word': 'ABC'}], 'abc', 0), 'v:val.word'),
+      \ ['abc'])
     End
   End
 
@@ -52,6 +77,18 @@ Describe ezfilter
         \ [{'word': 'MARSHALL'}, {'word': 'MARTHA'}, {'word': 'MARHTA'}, {'word': 'MARSHAL'}], 'MARTHA', 0.11), 'v:val.word'),
         \ ['MARTHA', 'MARHTA', 'MARSHALL', 'MARSHAL'])
     End
+
+    It switches case-sensitive/insensitive by the optional argument
+      Assert Equals(map(g:ezfilter.jw_filter(
+      \ [{'word': 'abc'}, {'word': 'Abc'}, {'word': 'ABc'}, {'word': 'ABC'}], 'abc', 0.3), 'v:val.word'),
+      \ ['abc', 'Abc', 'ABc', 'ABC'])
+      Assert Equals(map(g:ezfilter.jw_filter(
+      \ [{'word': 'abc'}, {'word': 'Abc'}, {'word': 'ABc'}, {'word': 'ABC'}], 'abc', 0.3, 1), 'v:val.word'),
+      \ ['abc', 'Abc', 'ABc', 'ABC'])
+      Assert Equals(map(g:ezfilter.jw_filter(
+      \ [{'word': 'abc'}, {'word': 'Abc'}, {'word': 'ABc'}, {'word': 'ABC'}], 'abc', 0.3, 0), 'v:val.word'),
+      \ ['abc', 'Abc'])
+    End
   End
 
   Context s:osa_filter(items, base, thr)
@@ -59,6 +96,18 @@ Describe ezfilter
       Assert Equals(map(g:ezfilter.osa_filter(
         \ [{'word': 'MARSHALL'}, {'word': 'MARTHA'}, {'word': 'MARHTA'}, {'word': 'MARSHAL'}], 'MARTHA', 2), 'v:val.word'),
         \ ['MARTHA', 'MARSHALL', 'MARHTA', 'MARSHAL'])
+    End
+
+    It switches case-sensitive/insensitive by the optional argument
+      Assert Equals(map(g:ezfilter.osa_filter(
+      \ [{'word': 'abc'}, {'word': 'Abc'}, {'word': 'ABc'}, {'word': 'ABC'}], 'abc', 1), 'v:val.word'),
+      \ ['abc', 'Abc', 'ABc', 'ABC'])
+      Assert Equals(map(g:ezfilter.osa_filter(
+      \ [{'word': 'abc'}, {'word': 'Abc'}, {'word': 'ABc'}, {'word': 'ABC'}], 'abc', 1, 1), 'v:val.word'),
+      \ ['abc', 'Abc', 'ABc', 'ABC'])
+      Assert Equals(map(g:ezfilter.osa_filter(
+      \ [{'word': 'abc'}, {'word': 'Abc'}, {'word': 'ABc'}, {'word': 'ABC'}], 'abc', 1, 0), 'v:val.word'),
+      \ ['abc', 'Abc'])
     End
   End
 End

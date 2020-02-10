@@ -29,7 +29,7 @@ let g:asyncomplete_preprocessor =
 
 let g:asyncomplete#preprocessor#ezfilter#config = {}
 let g:asyncomplete#preprocessor#ezfilter#config['*'] =
-  \ {ctx, items -> filter(items, 'ctx.match(v:val.word)')}
+  \ {ctx, items -> ctx.filter(items)}
 ```
 
  * Match items case-sensitive
@@ -40,7 +40,7 @@ let g:asyncomplete_preprocessor =
 
 let g:asyncomplete#preprocessor#ezfilter#config = {}
 let g:asyncomplete#preprocessor#ezfilter#config['*'] =
-  \ {ctx, items -> filter(items, 'stridx(v:val.word, ctx.base) == 0')}
+  \ {ctx, items -> ctx.filter(items, 1)}
 ```
 
  * Use [asyncomplete-unicodesymbol.vim](https://github.com/machakann/asyncomplete-unicodesymbol.vim)
@@ -82,29 +82,35 @@ let g:asyncomplete#preprocessor#ezfilter#config.Verdin =
 
 ### Methods of ctx
 
- * ctx.match({item})
+ * ctx.match({item} [, {ic}])
 
 Return 1 if `{item}.word` is forward-matched with `ctx.base`, otherwise 0.
+This method ignores case in default; it can be case-sensitive only when {ic} is given and it is |FALSE|, however.
 
- * ctx.jw_distance({item}[, {base}])
+ * ctx.jw_distance({item}[, {base} [, {ic}]])
 
 Return the [Jaro-Winker distance](https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance) between the two string {item} and {base}. Jaro-Winkler distance ranges from 0 to 1, smaller is similar. `ctx.base` is used as {base} if it is omitted.
+This method ignores case in default; it can be case-sensitive only when {ic} is given and it is |FALSE|, however.
 
- * ctx.osa_distance({item}[, {base}])
+ * ctx.osa_distance({item}[, {base} [, {ic}]])
 
 Return the [ristricted Damerau-Levenshtein distance](https://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance) (Optimal string alignment distance) between the two string {item} and {base}. Ristricted Damerau-Levenshtein distance represents the number of edit to make the two strings equal by deletion, insertion, substitution or transposition. Smaller is similar. `ctx.base` is used as {base} if it is omitted.
+This method ignores case in default; it can be case-sensitive only when {ic} is given and it is |FALSE|, however.
 
- * ctx.filter({items})
+ * ctx.filter({items} [, {ic}])
 
 Filter items in {items} by forward-matching. This is an equivalent of `filter(copy({items}), 'ctx.match(v:val.word)')` but might be faster if python3 interface is available.
+This method ignores case in default; it can be case-sensitive only when {ic} is given and it is |FALSE|, however.
 
- * ctx.jw_filter({items}, {thr})
+ * ctx.jw_filter({items}, {thr} [, {ic}])
 
 Filter items in {items} by Jaro-Winkler distance; items with a distance larger than {thr} are filtered out. Jaro-Winkler distance ranges from 0 to 1, typically 0.15 may work.
+This method ignores case in default; it can be case-sensitive only when {ic} is given and it is |FALSE|, however.
 
- * ctx.osa_filter({items}, {thr})
+ * ctx.osa_filter({items}, {thr} [, {ic}])
 
 Filter items in {items} by optimal string alignment distance; items with a distance larger than {thr} are filtered out. Typically, 1 or 2 may work.
+This method ignores case in default; it can be case-sensitive only when {ic} is given and it is |FALSE|, however.
 
 
 ## Note

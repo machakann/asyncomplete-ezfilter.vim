@@ -1,14 +1,26 @@
-function! asyncomplete#preprocessor#ezfilter#JaroWinkler#similarity(a, b) abort "{{{
+function! asyncomplete#preprocessor#ezfilter#JaroWinkler#similarity(a, b, ...) abort "{{{
   " NOTE: Cannot apply for multi-byte strings
+  let ignorecase = get(a:000, 0, 1)
   if a:a ==# '' && a:b ==# ''
     return 1.0
   elseif a:a ==# '' || a:b ==# ''
     return 0.0
-  elseif a:a ==? a:b
-    return 1.0
   endif
-  let a = toupper(a:a)
-  let b = toupper(a:b)
+
+  if ignorecase
+    if a:a ==? a:b
+      return 1.0
+    endif
+    let a = toupper(a:a)
+    let b = toupper(a:b)
+  else
+    if a:a ==# a:b
+      return 1.0
+    endif
+    let a = a:a
+    let b = a:b
+  endif
+
   let na = strlen(a:a)
   let nb = strlen(a:b)
   let [c, acommons, bcommons] = s:commonchar(a, b, na, nb)
@@ -24,8 +36,9 @@ function! asyncomplete#preprocessor#ezfilter#JaroWinkler#similarity(a, b) abort 
 endfunction "}}}
 
 
-function! asyncomplete#preprocessor#ezfilter#JaroWinkler#distance(a, b) abort "{{{
-  return 1.0 - asyncomplete#preprocessor#ezfilter#JaroWinkler#similarity(a:a, a:b)
+function! asyncomplete#preprocessor#ezfilter#JaroWinkler#distance(...) abort "{{{
+  let similarity = call('asyncomplete#preprocessor#ezfilter#JaroWinkler#similarity', a:000)
+  return 1.0 - similarity
 endfunction "}}}
 
 

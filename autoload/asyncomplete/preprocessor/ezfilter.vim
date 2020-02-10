@@ -34,59 +34,76 @@ if s:python3_available && g:asyncomplete#preprocessor#ezfilter#python3
   py3 import vim
   py3file <sfile>:h:h:h:h/python3/asyncomplete_ezfilter.py
 
-  function! s:jw_distance(word, base) abort "{{{
-    return py3eval('asyncomplete_ezfilter.jaro_winkler_distance(vim.eval("a:word"), vim.eval("a:base"))')
+  function! s:jw_distance(word, base, ...) abort "{{{
+    let ignorecase = get(a:000, 0, s:TRUE) ? 'True' : 'False'
+    let pyexpr = printf('asyncomplete_ezfilter.jaro_winkler_distance(vim.eval("a:word"), vim.eval("a:base"), ignorecase=%s)', ignorecase)
+    return py3eval(pyexpr)
   endfunction "}}}
 
-  function! s:osa_distance(word, base) abort "{{{
-    return py3eval('asyncomplete_ezfilter.optimal_string_alignment_distance(vim.eval("a:word"), vim.eval("a:base"))')
+  function! s:osa_distance(word, base, ...) abort "{{{
+    let ignorecase = get(a:000, 0, s:TRUE) ? 'True' : 'False'
+    let pyexpr = printf('asyncomplete_ezfilter.optimal_string_alignment_distance(vim.eval("a:word"), vim.eval("a:base"), ignorecase=%s)', ignorecase)
+    return py3eval(pyexpr)
   endfunction "}}}
 
-  function! s:filter(items, base) abort "{{{
-    return py3eval('asyncomplete_ezfilter.match_filter(vim.eval("a:items"), vim.eval("a:base"))')
+  function! s:filter(items, base, ...) abort "{{{
+    let ignorecase = get(a:000, 0, s:TRUE) ? 'True' : 'False'
+    let pyexpr = printf('asyncomplete_ezfilter.match_filter(vim.eval("a:items"), vim.eval("a:base"), ignorecase=%s)', ignorecase)
+    return py3eval(pyexpr)
   endfunction "}}}
 
-  function! s:jw_filter(items, base, thr) abort "{{{
-    return py3eval('asyncomplete_ezfilter.jaro_winkler_filter(vim.eval("a:items"), vim.eval("a:base"), vim.eval("a:thr"))')
+  function! s:jw_filter(items, base, thr, ...) abort "{{{
+    let ignorecase = get(a:000, 0, s:TRUE) ? 'True' : 'False'
+    let pyexpr = printf('asyncomplete_ezfilter.jaro_winkler_filter(vim.eval("a:items"), vim.eval("a:base"), vim.eval("a:thr"), ignorecase=%s)', ignorecase)
+    return py3eval(pyexpr)
   endfunction "}}}
 
-  function! s:osa_filter(items, base, thr) abort "{{{
-    return py3eval('asyncomplete_ezfilter.optimal_string_alignment_filter(vim.eval("a:items"), vim.eval("a:base"), vim.eval("a:thr"))')
+  function! s:osa_filter(items, base, thr, ...) abort "{{{
+    let ignorecase = get(a:000, 0, s:TRUE) ? 'True' : 'False'
+    let pyexpr = printf('asyncomplete_ezfilter.optimal_string_alignment_filter(vim.eval("a:items"), vim.eval("a:base"), vim.eval("a:thr"), ignorecase=%s)', ignorecase)
+    return py3eval(pyexpr)
   endfunction "}}}
 
 else
 
-  function! s:jw_distance(word, base) abort "{{{
-    return asyncomplete#preprocessor#ezfilter#JaroWinkler#distance(a:word, a:base)
+  function! s:jw_distance(...) abort "{{{
+    return call('asyncomplete#preprocessor#ezfilter#JaroWinkler#distance', a:000)
   endfunction "}}}
 
-  function! s:osa_distance(word, base) abort "{{{
-    return asyncomplete#preprocessor#ezfilter#OptimalStringAlignment#distance(a:word, a:base)
+  function! s:osa_distance(...) abort "{{{
+    return call('asyncomplete#preprocessor#ezfilter#OptimalStringAlignment#distance', a:000)
   endfunction "}}}
 
-  function! s:filter(items, base) abort "{{{
+  function! s:filter(items, base, ...) abort "{{{
+    let ignorecase = get(a:000, 0, s:TRUE)
     let matchpat = '^' . s:escape(a:base)
-    return filter(copy(a:items), 'v:val.word =~? matchpat')
+    if ignorecase
+      return filter(copy(a:items), 'v:val.word =~? matchpat')
+    else
+      return filter(copy(a:items), 'v:val.word =~# matchpat')
+    endif
   endfunction "}}}
 
-  function! s:jw_filter(items, base, thr) abort "{{{
+  function! s:jw_filter(items, base, thr, ...) abort "{{{
+    let ignorecase = get(a:000, 0, s:TRUE)
     let n = strlen(a:base)
     let matchlist = copy(a:items)
     for item in matchlist
       let word = strcharpart(item.word, 0, n)
-      let item._distance = s:jw_distance(word, a:base)
+      let item._distance = s:jw_distance(word, a:base, ignorecase)
     endfor
     call filter(matchlist, 'v:val._distance <= a:thr')
     call sort(matchlist, 's:compare_distance')
     return matchlist
   endfunction "}}}
 
-  function! s:osa_filter(items, base, thr) abort "{{{
+  function! s:osa_filter(items, base, thr, ...) abort "{{{
+    let ignorecase = get(a:000, 0, s:TRUE)
     let n = strlen(a:base)
     let matchlist = copy(a:items)
     for item in matchlist
       let word = strcharpart(item.word, 0, n)
-      let item._distance = s:osa_distance(word, a:base)
+      let item._distance = s:osa_distance(word, a:base, ignorecase)
     endfor
     call filter(matchlist, 'v:val._distance <= a:thr')
     call sort(matchlist, 's:compare_distance')
@@ -96,15 +113,25 @@ else
 endif
 
 
+function! s:match(word, pat, ...) abort "{{{
+  let ignorecase = get(a:000, 0, 1)
+  if ignorecase
+    return a:word =~? a:pat
+  else
+    return a:word =~# a:pat
+  endif
+endfunction "}}}
+
+
 function! s:set_methods(ctx) abort "{{{
   let base = a:ctx.base
   let matchpat = '^' . s:escape(base)
-  let a:ctx.match = {word -> word =~? matchpat}
-  let a:ctx.jw_distance = {word -> s:jw_distance(word, get(a:000, 0, base))}
-  let a:ctx.osa_distance = {word -> s:osa_distance(word, get(a:000, 0, base))}
-  let a:ctx.filter = {items -> s:filter(items, base)}
-  let a:ctx.jw_filter = {items, thr -> s:jw_filter(items, base, thr)}
-  let a:ctx.osa_filter = {items, thr -> s:osa_filter(items, base, thr)}
+  let a:ctx.match = {word -> s:match(word, matchpat, get(a:000, 0, s:TRUE))}
+  let a:ctx.jw_distance = {word -> s:jw_distance(word, get(a:000, 0, base), get(a:000, 1, s:TRUE))}
+  let a:ctx.osa_distance = {word -> s:osa_distance(word, get(a:000, 0, base), get(a:000, 1, s:TRUE))}
+  let a:ctx.filter = {items -> s:filter(items, base, get(a:000, 0, s:TRUE))}
+  let a:ctx.jw_filter = {items, thr -> s:jw_filter(items, base, thr, get(a:000, 0, s:TRUE))}
+  let a:ctx.osa_filter = {items, thr -> s:osa_filter(items, base, thr, get(a:000, 0, s:TRUE))}
   return a:ctx
 endfunction "}}}
 

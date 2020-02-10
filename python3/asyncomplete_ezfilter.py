@@ -2,8 +2,11 @@ import re
 
 
 class AsyncompleteEzfilter:
-    def match_filter(self, items, start):
-        pat = re.compile(re.escape(start), re.I)
+    def match_filter(self, items, start, *, ignorecase=True):
+        if ignorecase:
+            pat = re.compile(re.escape(start), re.I)
+        else:
+            pat = re.compile(re.escape(start))
         return [x for x in items if pat.match(x['word'])]
 
     def _commonchar(self, a, b):
@@ -51,13 +54,14 @@ class AsyncompleteEzfilter:
             return 4
         return ll
 
-    def jaro_winkler_similarity(self, a, b):
+    def jaro_winkler_similarity(self, a, b, *, ignorecase=True):
         if a == "" and b == "":
             return 1.0
         elif a == "" or b == "":
             return 0.0
-        a = a.upper()
-        b = b.upper()
+        if ignorecase:
+            a = a.upper()
+            b = b.upper()
         if a == b:
             return 1.0
         na = len(a)
@@ -72,16 +76,17 @@ class AsyncompleteEzfilter:
         djw = dj + ll * p * (1.0 - dj)
         return djw
 
-    def jaro_winkler_distance(self, a, b):
-        return 1.0 - self.jaro_winkler_similarity(a, b)
+    def jaro_winkler_distance(self, a, b, **kwargs):
+        similarity = self.jaro_winkler_similarity(a, b, **kwargs)
+        return 1.0 - similarity
 
-    def jaro_winkler_filter(self, items, base, thr):
+    def jaro_winkler_filter(self, items, base, thr, **kwargs):
         thr = float(thr)
         n = len(base)
         matchlist = []
         for x in items:
             lead = x['word'][:n]
-            x['_distance'] = self.jaro_winkler_distance(lead, base)
+            x['_distance'] = self.jaro_winkler_distance(lead, base, **kwargs)
             if x['_distance'] <= thr:
                 matchlist.append(x)
         matchlist.sort(key=lambda x: x['_distance'])
@@ -116,24 +121,26 @@ class AsyncompleteEzfilter:
             vn = d0 & ((hp << 1) | 1)
         return dt
 
-    def optimal_string_alignment_distance(self, a, b):
+    def optimal_string_alignment_distance(self, a, b, *, ignorecase=True):
         na = len(a)
         nb = len(b)
         if na == 0 or nb == 0:
             return max(na, nb)
-        a = a.upper()
-        b = b.upper()
+        if ignorecase:
+            a = a.upper()
+            b = b.upper()
         if a == b:
             return 0
         return self._osa_distance_BP(a, b)
 
-    def optimal_string_alignment_filter(self, items, base, thr):
+    def optimal_string_alignment_filter(self, items, base, thr, **kwargs):
         thr = float(thr)
         n = len(base)
         matchlist = []
         for x in items:
             lead = x['word'][:n]
-            x['_distance'] = self.optimal_string_alignment_distance(lead, base)
+            x['_distance'] = self.optimal_string_alignment_distance(
+                lead, base, **kwargs)
             if x['_distance'] <= thr:
                 matchlist.append(x)
         matchlist.sort(key=lambda x: x['_distance'])

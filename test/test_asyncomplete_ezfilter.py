@@ -6,8 +6,8 @@ ezfilter = AsyncompleteEzfilter()
 
 class TestAsyncompleteEzfilter(TestCase):
     def test_jaro_winkler_distance(self):
-        self.assertAlmostEqual(
-            ezfilter.jaro_winkler_distance('RICK', 'RICK'), 0.0)
+        self.assertAlmostEqual(ezfilter.jaro_winkler_distance('RICK', 'RICK'),
+                               0.0)
 
         self.assertAlmostEqual(
             ezfilter.jaro_winkler_distance('MARTHA', 'MARHTA'),
@@ -22,6 +22,17 @@ class TestAsyncompleteEzfilter(TestCase):
 
         self.assertAlmostEqual(
             ezfilter.jaro_winkler_distance('ABCDE', 'FGHIJ'), 1.0)
+
+        self.assertAlmostEqual(
+            ezfilter.jaro_winkler_distance('ABCDE', 'abcde'), 0.0)
+
+        self.assertAlmostEqual(
+            ezfilter.jaro_winkler_distance('ABCDE', 'abcde', ignorecase=True),
+            0.0)
+
+        self.assertAlmostEqual(
+            ezfilter.jaro_winkler_distance('ABCDE', 'abcde', ignorecase=False),
+            1.0)
 
     def test_optimal_string_alignment_distance(self):
         self.assertAlmostEqual(
@@ -38,3 +49,16 @@ class TestAsyncompleteEzfilter(TestCase):
 
         self.assertAlmostEqual(
             ezfilter.optimal_string_alignment_distance('ABCDE', 'FGHIJ'), 5)
+
+        self.assertAlmostEqual(
+            ezfilter.optimal_string_alignment_distance('ABCDE', 'abcde'), 0)
+
+        self.assertAlmostEqual(
+            ezfilter.optimal_string_alignment_distance('ABCDE',
+                                                       'abcde',
+                                                       ignorecase=True), 0)
+
+        self.assertAlmostEqual(
+            ezfilter.optimal_string_alignment_distance('ABCDE',
+                                                       'abcde',
+                                                       ignorecase=False), 5)

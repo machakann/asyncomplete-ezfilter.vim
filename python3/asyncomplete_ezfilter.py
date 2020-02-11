@@ -92,23 +92,36 @@ class AsyncompleteEzfilter:
         matchlist.sort(key=lambda x: x['_distance'])
         return matchlist
 
-    def _get_pattern_match_vector(self, a, b):
-        pm = [0 for i in range(len(b) + 1)]
-        for i, _a in enumerate(a):
-            for j, _b in enumerate(b):
-                if _a == _b:
-                    pm[j + 1] |= 1 << i
+    # pattern match dictionary is a kind of cache. It is not essential but
+    # accelerates self._get_pattern_match_vector()
+    def _get_pattern_match_dict(self, base):
+        pd = {c: 0 for c in base}
+        for i, c in enumerate(base):
+            pd[c] |= 1 << i
+        return pd
+
+    def _get_pattern_match_vector(self, pd, word):
+        pm = [0 for _ in range(len(word) + 1)]
+        for j, c in enumerate(word):
+            if c in pd:
+                pm[j + 1] |= pd[c]
         return pm
 
-    # optimal string alignment distance by bit-parallel algorithm
-    def _osa_distance_BP(self, a, b):
-        pm = self._get_pattern_match_vector(a, b)
+    # optimal string alignment distance by bit-parallel algorithm [1,2]
+    # 1. "A Bit-Vector Algorithm for Computing Levenshtein and Damerau Edit Distances",
+    # Heikki Hyyrö, Journal Nordic Journal of Computing 10, 29-39, 2003
+    # 2. "Explaining and Extending the Bit-parallel Approximate String Matching Algorithm of Myers",
+    # Heikki Hyyrö, Technical report A2001-10 of the Department of Computer and Information Sciences, University of Tampere, 2001
+    def _osa_distance_BP(self, word, base, pd=None):
+        if pd is None:
+            pd = self._get_pattern_match_dict(base)
+        pm = self._get_pattern_match_vector(pd, word)
         vp = ~0
         vn = 0
-        dt = len(a)
+        dt = len(base)
         d0 = 0
         ms = 1 << (dt - 1)
-        for j in range(1, len(b) + 1):
+        for j in range(1, len(word) + 1):
             d0 = (((~d0) & pm[j]) << 1) & pm[j - 1]
             d0 = d0 | (((pm[j] & vp) + vp) ^ vp) | pm[j] | vn
             hp = vn | ~(d0 | vp)
@@ -133,14 +146,25 @@ class AsyncompleteEzfilter:
             return 0
         return self._osa_distance_BP(a, b)
 
-    def optimal_string_alignment_filter(self, items, base, thr, **kwargs):
-        thr = float(thr)
+    def optimal_string_alignment_filter(self,
+                                        items,
+                                        base,
+                                        thr,
+                                        *,
+                                        ignorecase=True):
+        if not base:
+            return items
+        if ignorecase:
+            base = base.upper()
         n = len(base)
+        pd = self._get_pattern_match_dict(base)
+        thr = float(thr)
         matchlist = []
         for x in items:
             lead = x['word'][:n]
-            x['_distance'] = self.optimal_string_alignment_distance(
-                lead, base, **kwargs)
+            if ignorecase:
+                lead = lead.upper()
+            x['_distance'] = self._osa_distance_BP(lead, base, pd)
             if x['_distance'] <= thr:
                 matchlist.append(x)
         matchlist.sort(key=lambda x: x['_distance'])

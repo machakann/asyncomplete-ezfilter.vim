@@ -151,6 +151,12 @@ function! s:compare_distance(a, b) abort "{{{
 endfunction "}}}
 
 
+" For debug and performance check
+function! asyncomplete#preprocessor#ezfilter#_obj(base) abort "{{{
+  return s:set_methods({'base': a:base})
+endfunction "}}}
+
+
 " load g:asyncomplete#preprocessor#ezfilter#config
 let g:asyncomplete#preprocessor#ezfilter#config =
   \ get(g:, 'asyncomplete#preprocessor#ezfilter#config', {})

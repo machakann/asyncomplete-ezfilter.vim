@@ -101,7 +101,7 @@ class AsyncompleteEzfilter:
         return pd
 
     def _get_pattern_match_vector(self, pd, word):
-        pm = [0 for _ in range(len(word) + 1)]
+        pm = [0] * (len(word) + 1)
         for j, c in enumerate(word):
             if c in pd:
                 pm[j + 1] |= pd[c]

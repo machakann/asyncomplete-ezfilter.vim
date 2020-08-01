@@ -64,7 +64,7 @@ function! s:commonchar(a, b, na, nb) abort "{{{
       let c += 1.0
     endif
   endfor
-  return [c, acommons, map(sort(bindexes), 'a:b[v:val]')]
+  return [c, acommons, map(sort(bindexes, 'n'), 'a:b[v:val]')]
 endfunction "}}}
 
 

@@ -14,6 +14,7 @@ Describe ezfilter
       Assert Compare(g:ezfilter.jw_distance('DWAYNE', 'DUANE')    - 0.16,  '<', 0.0001)
       Assert Compare(g:ezfilter.jw_distance('DIXON',  'DICKSONX') - 0.187, '<', 0.0001)
       Assert Compare(g:ezfilter.jw_distance('ABCDE',  'FGHIJ')    - 1.0,   '<', 0.0001)
+      Assert True(g:ezfilter.jw_distance('background',  'background-imag') > g:ezfilter.jw_distance('background-image',  'background-imag'))
     End
 
     It switches case-sensitive/insensitive by the optional argument

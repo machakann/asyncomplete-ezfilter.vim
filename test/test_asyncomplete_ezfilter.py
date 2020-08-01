@@ -34,6 +34,11 @@ class TestAsyncompleteEzfilter(TestCase):
             ezfilter.jaro_winkler_distance('ABCDE', 'abcde', ignorecase=False),
             1.0)
 
+        self.assertGreater(
+            ezfilter.jaro_winkler_distance('background', 'background-imag'),
+            ezfilter.jaro_winkler_distance('background-image',
+                                           'background-imag'))
+
     def test_optimal_string_alignment_distance(self):
         self.assertAlmostEqual(
             ezfilter.optimal_string_alignment_distance('RICK', 'RICK'), 0)
